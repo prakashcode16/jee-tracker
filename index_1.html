@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JEE Mains 2027 — Prep Tracker</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#091413">
+<link rel="apple-touch-icon" href="icon-192.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  :root{
+    --ink:#1c2321; --ink-soft:#4a534f; --ink-faint:#8a938e;
+    --paper:#f6f3ec; --paper-card:#fffdf8; --line:#ddd6c5; --line-strong:#c9c0a8;
+    --physics:#2b5a8c; --physics-bg:#e5edf5;
+    --chemistry:#3d7a4a; --chemistry-bg:#e6f0e5;
+    --maths:#a56a1e; --maths-bg:#f5ecdb;
+    --done:#3d7a4a; --progress:#a56a1e; --not-started:#b3ab97; --danger:#b34a3a;
+  }
+  [data-theme="dark"]{
+    --ink:#e7ede9; --ink-soft:#9fb0a8; --ink-faint:#63756c;
+    --paper:#091413; --paper-card:#0f201d; --line:#1c3330; --line-strong:#2a4a45;
+    --physics:#6fa4e0; --physics-bg:#16273b;
+    --chemistry:#5fce87; --chemistry-bg:#0f2a1e;
+    --maths:#e0a94e; --maths-bg:#332510;
+    --done:#5fce87; --progress:#e0a94e; --not-started:#3a504a; --danger:#e07a68;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--paper);color:var(--ink);padding:0 0 3rem;transition:background .15s ease,color .15s ease;}
+  .theme-toggle{display:flex;align-items:center;gap:8px;}
+  .theme-toggle .lbl{font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.05em;}
+  .switch{position:relative;width:42px;height:24px;border-radius:14px;background:var(--line-strong);border:1px solid var(--line-strong);cursor:pointer;flex-shrink:0;}
+  .switch .knob{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--paper-card);transition:left .15s ease;}
+  .switch.on{background:var(--ink);border-color:var(--ink);}
+  .switch.on .knob{left:20px;}
+  .wrap{max-width:960px;margin:0 auto;padding:0 20px;}
+  header.top{padding:28px 20px 20px;border-bottom:1px solid var(--line);background:var(--paper);}
+  header.top .inner{max-width:960px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px;}
+  .title-block h1{font-family:Georgia,"Times New Roman",serif;font-size:26px;font-weight:600;margin:0 0 4px;letter-spacing:-0.01em;}
+  .title-block p{margin:0;color:var(--ink-soft);font-size:13px;}
+  .countdown{text-align:right;background:var(--paper-card);border:1px solid var(--line);border-radius:10px;padding:10px 18px;min-width:150px;}
+  .countdown .num{font-size:28px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;}
+  .countdown .lbl{font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-faint);margin-top:3px;}
+  nav.tabs{display:flex;gap:4px;margin-top:18px;border-bottom:1px solid var(--line);max-width:960px;margin-left:auto;margin-right:auto;padding:0 20px;flex-wrap:wrap;}
+  nav.tabs button{appearance:none;border:none;background:none;cursor:pointer;padding:10px 14px;font-size:14px;color:var(--ink-soft);border-bottom:2px solid transparent;margin-bottom:-1px;font-family:inherit;}
+  nav.tabs button.active{color:var(--ink);border-bottom-color:var(--ink);font-weight:600;}
+  nav.tabs button:hover{color:var(--ink);}
+  main{padding-top:24px;}
+  .overview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:26px;}
+  @media(max-width:640px){.overview-grid{grid-template-columns:1fr;}}
+  .subj-card{background:var(--paper-card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;}
+  .subj-card .head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
+  .subj-card .name{font-weight:600;font-size:15px;}
+  .subj-card .pct{font-size:13px;color:var(--ink-soft);font-variant-numeric:tabular-nums;}
+  .bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden;}
+  .bar .fill{height:100%;border-radius:4px;transition:width .25s ease;}
+  .subj-card.physics .fill{background:var(--physics);}
+  .subj-card.chemistry .fill{background:var(--chemistry);}
+  .subj-card.maths .fill{background:var(--maths);}
+  .subj-card .meta{margin-top:8px;font-size:12px;color:var(--ink-faint);}
+  h2.section-h{font-size:17px;font-weight:600;margin:22px 0 12px;font-family:Georgia,serif;}
+  h2.section-h:first-child{margin-top:0;}
+  .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:10px;}
+  @media(max-width:640px){.stat-row{grid-template-columns:1fr 1fr;}}
+  .stat{background:var(--paper-card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;}
+  .stat .v{font-size:20px;font-weight:700;}
+  .stat .k{font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.05em;margin-top:2px;}
+  .qs-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+  @media(max-width:640px){.qs-row{grid-template-columns:1fr;}}
+  .qs-card{border-radius:10px;padding:10px 14px;border:1px solid var(--line);}
+  .qs-card.physics{background:var(--physics-bg);}
+  .qs-card.chemistry{background:var(--chemistry-bg);}
+  .qs-card.maths{background:var(--maths-bg);}
+  .qs-card .v{font-size:18px;font-weight:700;}
+  .qs-card .k{font-size:11px;text-transform:uppercase;letter-spacing:0.05em;opacity:0.75;margin-top:2px;}
+  .subj-card.physics .v,.qs-card.physics .v{color:var(--physics);}
+  .qs-card.chemistry .v{color:var(--chemistry);}
+  .qs-card.maths .v{color:var(--maths);}
+
+  .pill-tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;}
+  .pill-tabs button{appearance:none;cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:600;padding:6px 13px;border-radius:20px;border:1px solid var(--line-strong);background:var(--paper-card);color:var(--ink-soft);}
+  .pill-tabs button.active{background:var(--ink);border-color:var(--ink);color:var(--paper-card);}
+  .pill-tabs button.active.physics{background:var(--physics-bg);border-color:var(--physics);color:var(--physics);}
+  .pill-tabs button.active.chemistry{background:var(--chemistry-bg);border-color:var(--chemistry);color:var(--chemistry);}
+  .pill-tabs button.active.maths{background:var(--maths-bg);border-color:var(--maths);color:var(--maths);}
+
+  .subj-tabs{display:flex;gap:8px;margin-bottom:16px;}
+  .subj-tabs button{appearance:none;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;padding:7px 14px;border-radius:20px;border:1px solid var(--line-strong);background:var(--paper-card);color:var(--ink-soft);}
+  .subj-tabs button.active.physics{background:var(--physics-bg);border-color:var(--physics);color:var(--physics);}
+  .subj-tabs button.active.chemistry{background:var(--chemistry-bg);border-color:var(--chemistry);color:var(--chemistry);}
+  .subj-tabs button.active.maths{background:var(--maths-bg);border-color:var(--maths);color:var(--maths);}
+
+  .chapter-list{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--paper-card);}
+  .chapter-row{border-bottom:1px solid var(--line);}
+  .chapter-row:last-child{border-bottom:none;}
+  .chapter-head{display:flex;align-items:center;gap:10px;padding:11px 16px;cursor:pointer;font-size:14px;}
+  .chapter-head:hover{background:var(--paper);}
+  .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .dot.not-started{background:var(--not-started);}
+  .dot.in-progress{background:var(--progress);}
+  .dot.done{background:var(--done);}
+  .chapter-head .cinfo{flex:1;}
+  .chapter-head .cname{font-weight:500;}
+  .chapter-head .csub{font-size:11.5px;color:var(--ink-faint);margin-top:2px;}
+  .chevron{font-size:11px;color:var(--ink-faint);transition:transform .15s ease;}
+  .chevron.open{transform:rotate(90deg);}
+  .chapter-body{padding:4px 16px 16px;display:none;}
+  .chapter-body.open{display:block;}
+  .lec-table-v{width:auto;min-width:180px;border-collapse:collapse;}
+  .lec-table-v th{font-size:11px;color:var(--ink-faint);font-weight:600;text-align:center;padding:4px 14px;border-bottom:1px solid var(--line);}
+  .lec-table-v td{padding:4px 14px;text-align:center;border-bottom:1px solid var(--line);}
+  .lec-table-v tr:last-child td{border-bottom:none;}
+  .lec-table-v .rlabel{text-align:left;font-size:12px;color:var(--ink-faint);}
+  .lec-table-v th.rlabel{text-align:left;}
+
+  .form-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;background:var(--paper-card);border:1px solid var(--line);border-radius:10px;padding:14px;align-items:flex-start;}
+  .form-row input,.form-row select,.form-row textarea{font-family:inherit;font-size:13px;border:1px solid var(--line-strong);border-radius:6px;padding:7px 9px;background:var(--paper);color:var(--ink);}
+  .form-row input[type=date]{width:150px;}
+  .form-row input[type=number]{width:78px;}
+  .form-row textarea{width:100%;min-height:44px;resize:vertical;font-family:inherit;}
+  .form-row button.add-btn{background:var(--ink);color:var(--paper-card);border:none;border-radius:6px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+  .form-row button.add-btn:hover{opacity:0.88;}
+  .fgroup{display:flex;flex-direction:column;gap:3px;}
+  .fgroup label{font-size:10.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.04em;}
+  .time-combo{display:flex;gap:4px;align-items:center;}
+  .time-combo select{width:64px;}
+
+  .log-list, .test-list{display:flex;flex-direction:column;gap:8px;}
+  .log-item, .test-item{background:var(--paper-card);border:1px solid var(--line);border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+  .log-item .l-left{flex:1;}
+  .log-item .date{font-weight:600;font-size:13px;}
+  .log-item .hrs{color:var(--ink-soft);font-size:13px;margin-left:8px;}
+  .log-item .qbits{font-size:11.5px;color:var(--ink-faint);margin-top:4px;}
+  .log-item .notes{color:var(--ink-soft);font-size:13px;margin-top:4px;}
+  .test-item .name{font-size:13px;color:var(--ink-soft);}
+  .test-item .score{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;}
+  .del-btn{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:12px;padding:2px 6px;}
+  .del-btn:hover{color:var(--danger);}
+  .empty{color:var(--ink-faint);font-size:13px;padding:20px;text-align:center;background:var(--paper-card);border:1px dashed var(--line-strong);border-radius:10px;}
+  .weak-tag{display:inline-block;font-size:10px;background:var(--danger);color:#fff;padding:1px 6px;border-radius:8px;margin-left:6px;vertical-align:middle;}
+
+  .date-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+  .date-pills button{appearance:none;cursor:pointer;font-family:inherit;font-size:12px;padding:5px 11px;border-radius:16px;border:1px solid var(--line-strong);background:var(--paper-card);color:var(--ink-soft);}
+  .date-pills button.active{background:var(--ink);border-color:var(--ink);color:var(--paper-card);}
+  .date-pills button.clear{border-style:dashed;}
+
+  .practice-list{columns:3;column-gap:22px;}
+  @media(max-width:640px){.practice-list{columns:2;}}
+  .practice-row{display:flex;align-items:center;gap:8px;padding:6px 4px;font-size:13px;break-inside:avoid;border-bottom:1px solid var(--line);cursor:pointer;}
+  .practice-row:hover{background:var(--paper-card);}
+
+  .cloud-banner{background:var(--maths-bg);color:var(--maths);border-bottom:1px solid var(--line);font-size:12.5px;padding:8px 20px;text-align:center;}
+  .auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .auth-card{background:var(--paper-card);border:1px solid var(--line);border-radius:14px;padding:28px 26px;max-width:340px;width:100%;}
+  .auth-card h1{font-family:Georgia,serif;font-size:20px;margin:0 0 4px;}
+  .auth-card p.sub{font-size:12.5px;color:var(--ink-faint);margin:0 0 20px;}
+  .auth-tabs{display:flex;gap:4px;margin-bottom:16px;background:var(--paper);border-radius:8px;padding:3px;}
+  .auth-tabs button{flex:1;appearance:none;border:none;background:none;padding:7px;font-size:12.5px;font-weight:600;border-radius:6px;cursor:pointer;color:var(--ink-soft);font-family:inherit;}
+  .auth-tabs button.active{background:var(--paper-card);color:var(--ink);}
+  .auth-field{display:flex;flex-direction:column;gap:4px;margin-bottom:12px;}
+  .auth-field label{font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.04em;}
+  .auth-field input{font-family:inherit;font-size:13px;border:1px solid var(--line-strong);border-radius:6px;padding:9px 10px;background:var(--paper);color:var(--ink);}
+  .auth-submit{width:100%;background:var(--ink);color:var(--paper-card);border:none;border-radius:6px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:4px;}
+  .auth-submit:hover{opacity:0.9;}
+  .auth-divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--ink-faint);font-size:11px;}
+  .auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--line);}
+  .auth-google{width:100%;background:var(--paper);border:1px solid var(--line-strong);border-radius:6px;padding:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--ink);}
+  .auth-google:hover{background:var(--line-strong);}
+  .auth-msg{font-size:12px;margin-top:12px;padding:8px 10px;border-radius:6px;}
+  .auth-msg.error{background:#3a1a16;color:#e07a68;}
+  [data-theme="light"] .auth-msg.error{background:#f6e2de;color:#8a2c1d;}
+  .auth-msg.info{background:var(--maths-bg);color:var(--maths);}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+
+const SYLLABUS = {
+  physics: [
+    ["Rectilinear Motion",4],["Projectile Motion",2],["Relative Motion",2],["Geometrical Optics",6],
+    ["Newton's Laws of Motion",3],["Friction",2],["Work, Power, Energy (WPE)",3],["Circular Motion",3],
+    ["Centre of Mass",4],["Rigid Body Motion",5],["Simple Harmonic Motion (SHM)",3],["Electrostatics",6],
+    ["Gravitation",2],["Current Electricity",4],["Capacitor",2],["Electromotive Force (EMF)",5],
+    ["Electromagnetic Induction (EMI)",4],["Alternating Current",2],["Electromagnetic Waves (EMW)",1],
+    ["Dual Nature of Matter & Radiation",2],["Atomic Structure",2],["Nuclear Physics",1],
+    ["Kinetic Theory of Gases (KTG)",1],["Thermodynamics",3],["Fluid Mechanics",3],["Viscosity",1],
+    ["Surface Tension",1],["Elasticity",1],["Wave on String",3],["Sound Wave",3],["Wave Optics",3],
+    ["Heat Transfer",2],["Semiconductor",3],["Unit & Dimension",1],["Error & Measurement",2]
+  ],
+  chemistry: [
+    ["Mole Concept",5],["IUPAC Nomenclature & General Names",3],["Atomic Structure",6],["Periodic Table",3],
+    ["General Organic Chemistry",5],["Chemical Bonding",8],["Isomerism",5],["Chemical & Ionic Equilibrium",9],
+    ["Coordination Compound",5],["Hydrocarbons",4],["Electrochemistry",5],["Haloalkanes & Aryl Halides",3],
+    ["Qualitative Analysis (JEE Main)",2],["P-Block (JEE Main)",4],["Alcohol, Ether & Phenol",4],
+    ["Chemical Kinetics",4],["Amines & Diazonium Salt",2],["Aldehyde, Ketones & Carboxylic Acid",4],
+    ["Liquid Solution",4],["D & F Block",2],["Biomolecules",2],["Thermodynamics & Thermochemistry",7],
+    ["Equivalent Concept",2]
+  ],
+  maths: [
+    ["Sets",2],["Fundamentals of Mathematics (FOM)",7],["Trigonometry",6],["Progression and Series",5],
+    ["Statistics",2],["Quadratic Equations",4],["Relation",1],["Function",5],
+    ["Inverse Trigonometric Functions (ITF)",3],["Matrices & Determinants",7],["Straight Line",5],
+    ["Circle",4],["Vector & 3-D",8],["Limits, Continuity & Differentiability (LCD)",6],
+    ["Method of Differentiation (MOD)",1],["Application of Derivatives (AOD)",4],
+    ["Conic Section (Parabola, Ellipse, Hyperbola)",3],["Indefinite Integration",3],
+    ["Definite Integration",4],["Area Under Curve",2],["Differential Equations",3],["Complex Numbers",4],
+    ["Binomial Theorem",3],["Permutations & Combinations",3],["Probability",4],["Solution of Triangle",1]
+  ]
+};
+const DEFAULT_SETTINGS = {
+  examDate: '2027-01-24',
+  weakSubjects: { physics:true, chemistry:false, maths:true }
+};
+const SUBJECT_META = {
+  physics:{label:"Physics",color:"physics"},
+  chemistry:{label:"Chemistry",color:"chemistry"},
+  maths:{label:"Maths",color:"maths"}
+};
+const PRACTICE_SESSIONS = {
+  physics: (()=>{
+    const arr=[];
+    for(let i=1;i<=34;i++) arr.push(String(i));
+    arr.push('35A','35B','35C');
+    for(let i=36;i<=39;i++) arr.push(String(i));
+    arr.push('40A','40B','40C');
+    for(let i=41;i<=47;i++) arr.push(String(i));
+    arr.push('48A','48B');
+    return arr;
+  })(),
+  maths: Array.from({length:48},(_,i)=>String(i+1)),
+  chemistry: Array.from({length:46},(_,i)=>String(i+1))
+};
+
+let state = { chapters:{}, logs:[], tests:[], practiceSessions:{}, theme:'light', settings:{ examDate: DEFAULT_SETTINGS.examDate, weakSubjects: Object.assign({},DEFAULT_SETTINGS.weakSubjects) } };
+let currentTab = 'dashboard';
+let currentSubjectTab = 'physics';
+let currentPracticeTab = 'physics';
+let expandedChapters = new Set();
+let logPeriod = 'daily';
+let logSubjectFilter = 'all';
+let selectedLogDate = null;
+
+function todayIST(){
+  return new Date().toLocaleDateString('en-CA', {timeZone:'Asia/Kolkata'});
+}
+function formatExamDate(dateStr){
+  try{
+    const d = new Date(dateStr+'T00:00:00+05:30');
+    return d.toLocaleDateString('en-US', {month:'long', year:'numeric', timeZone:'Asia/Kolkata'});
+  }catch(e){ return dateStr; }
+}
+function weakSubjectsText(){
+  const flagged = Object.keys(SUBJECT_META).filter(s=>state.settings.weakSubjects[s]).map(s=>SUBJECT_META[s].label);
+  return flagged.length ? 'Focus areas: '+flagged.join(', ') : 'No flagged weak areas';
+}
+
+function initChapters(){
+  Object.keys(SYLLABUS).forEach(subj=>{
+    if(!state.chapters[subj]) state.chapters[subj] = {};
+    SYLLABUS[subj].forEach(([ch,count])=>{
+      const existing = state.chapters[subj][ch];
+      if(!existing || !Array.isArray(existing.lectures) || existing.lectures.length!==count){
+        state.chapters[subj][ch] = { lectures:new Array(count).fill(false), dpps:new Array(count).fill(false) };
+      }
+    });
+  });
+  Object.keys(SUBJECT_META).forEach(subj=>{
+    const labels = PRACTICE_SESSIONS[subj];
+    const existing = state.practiceSessions[subj] || {};
+    const fresh = {};
+    labels.forEach(lbl=>{ fresh[lbl] = existing[lbl] || false; });
+    state.practiceSessions[subj] = fresh;
+  });
+}
+
+// ── Cloud sync config ────────────────────────────────────────────
+// Fill these in with your own Supabase project's values (Project Settings → API).
+const SUPABASE_URL = 'https://uzkvgxdpavjaciyccvgg.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV6a3ZneGRwYXZqYWNpeWNjdmdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODczODE5NDUsImV4cCI6MjEwMjk1Nzk0NX0.lKDC8bHCidHrz_wiRytD8BxJ2Y167jPgYr_yATN45rw';
+const CLOUD_ENABLED = !SUPABASE_URL.includes('YOUR_SUPABASE_URL');
+const sb = CLOUD_ENABLED ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+let currentUser = null;
+let authMode = 'signin'; // 'signin' | 'signup'
+let authError = '';
+let authInfo = '';
+let saveTimer = null;
+
+function freshState(){
+  return { chapters:{}, logs:[], tests:[], practiceSessions:{}, theme:'light',
+    settings:{ examDate: DEFAULT_SETTINGS.examDate, weakSubjects: Object.assign({},DEFAULT_SETTINGS.weakSubjects) } };
+}
+function normalizeLoadedState(parsed){
+  state = Object.assign(freshState(), parsed);
+  state.settings = Object.assign({}, DEFAULT_SETTINGS, state.settings);
+  state.settings.weakSubjects = Object.assign({}, DEFAULT_SETTINGS.weakSubjects, state.settings.weakSubjects);
+  initChapters();
+}
+
+async function boot(){
+  if(!CLOUD_ENABLED){
+    loadLocalOnly();
+    return;
+  }
+  const { data:{ session } } = await sb.auth.getSession();
+  if(session){ currentUser = session.user; await loadStateFromCloud(); }
+  else { renderAuthScreen(); }
+  sb.auth.onAuthStateChange((event, session)=>{
+    if(session && (!currentUser || currentUser.id!==session.user.id)){
+      currentUser = session.user; loadStateFromCloud();
+    } else if(!session && currentUser){
+      currentUser = null; state = freshState(); initChapters(); renderAuthScreen();
+    }
+  });
+}
+
+function loadLocalOnly(){
+  try{
+    const raw = localStorage.getItem('jee-tracker-state');
+    if(raw) normalizeLoadedState(JSON.parse(raw));
+    else normalizeLoadedState({});
+  }catch(e){ normalizeLoadedState({}); }
+  render();
+}
+
+async function loadStateFromCloud(){
+  try{
+    const { data, error } = await sb.from('tracker_state').select('data').eq('user_id', currentUser.id).maybeSingle();
+    if(error) throw error;
+    normalizeLoadedState(data && data.data ? data.data : {});
+    localStorage.setItem('jee-tracker-cache', JSON.stringify(state));
+  }catch(e){
+    console.error('cloud load failed, using offline cache', e);
+    try{
+      const raw = localStorage.getItem('jee-tracker-cache');
+      normalizeLoadedState(raw ? JSON.parse(raw) : {});
+    }catch(e2){ normalizeLoadedState({}); }
+  }
+  render();
+}
+
+function saveState(){
+  try{ localStorage.setItem(CLOUD_ENABLED ? 'jee-tracker-cache' : 'jee-tracker-state', JSON.stringify(state)); }
+  catch(e){ console.error('local cache save failed', e); }
+  if(!CLOUD_ENABLED || !currentUser) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async ()=>{
+    try{
+      await sb.from('tracker_state').upsert({ user_id: currentUser.id, data: state, updated_at: new Date().toISOString() });
+    }catch(e){ console.error('cloud save failed', e); }
+  }, 700);
+}
+
+function renderAuthScreen(){
+  const app = document.getElementById('app');
+  document.documentElement.setAttribute('data-theme','dark');
+  app.innerHTML = '';
+  const wrap = document.createElement('div'); wrap.className = 'auth-wrap';
+  const card = document.createElement('div'); card.className = 'auth-card';
+  card.innerHTML = `
+    <h1>JEE prep tracker</h1>
+    <p class="sub">Sign in to sync your progress across devices.</p>
+    <div class="auth-tabs">
+      <button id="tab-signin" class="${authMode==='signin'?'active':''}">Sign in</button>
+      <button id="tab-signup" class="${authMode==='signup'?'active':''}">Sign up</button>
+    </div>
+    <div class="auth-field"><label>Email</label><input type="email" id="auth-email" autocomplete="email"></div>
+    <div class="auth-field"><label>Password</label><input type="password" id="auth-password" autocomplete="${authMode==='signin'?'current-password':'new-password'}"></div>
+    <button class="auth-submit" id="auth-submit">${authMode==='signin'?'Sign in':'Create account'}</button>
+    <div class="auth-divider">OR</div>
+    <button class="auth-google" id="auth-google">Continue with Google</button>
+    ${authError?`<div class="auth-msg error">${escapeHtml(authError)}</div>`:''}
+    ${authInfo?`<div class="auth-msg info">${escapeHtml(authInfo)}</div>`:''}
+  `;
+  wrap.appendChild(card);
+  app.appendChild(wrap);
+
+  card.querySelector('#tab-signin').onclick = ()=>{ authMode='signin'; authError=''; authInfo=''; renderAuthScreen(); };
+  card.querySelector('#tab-signup').onclick = ()=>{ authMode='signup'; authError=''; authInfo=''; renderAuthScreen(); };
+
+  card.querySelector('#auth-submit').onclick = async ()=>{
+    const email = card.querySelector('#auth-email').value.trim();
+    const password = card.querySelector('#auth-password').value;
+    authError=''; authInfo='';
+    if(!email || !password){ authError='Enter both email and password.'; renderAuthScreen(); return; }
+    try{
+      if(authMode==='signin'){
+        const { error } = await sb.auth.signInWithPassword({ email, password });
+        if(error) throw error;
+      } else {
+        const { error } = await sb.auth.signUp({ email, password });
+        if(error) throw error;
+        authInfo = 'Account created. Check your email to confirm, then sign in.';
+        authMode = 'signin';
+      }
+    }catch(e){ authError = e.message || 'Something went wrong.'; }
+    renderAuthScreen();
+  };
+
+  card.querySelector('#auth-google').onclick = async ()=>{
+    try{
+      const { error } = await sb.auth.signInWithOAuth({ provider:'google', options:{ redirectTo: window.location.href } });
+      if(error) throw error;
+    }catch(e){ authError = e.message || 'Google sign-in failed.'; renderAuthScreen(); }
+  };
+}
+
+function daysLeft(){
+  const ms = Date.parse(state.settings.examDate+'T00:00:00+05:30') - Date.parse(todayIST()+'T00:00:00+05:30');
+  return Math.round(ms/86400000);
+}
+
+function chapterStatus(entry){
+  const total = entry.lectures.length + entry.dpps.length;
+  const done = entry.lectures.filter(Boolean).length + entry.dpps.filter(Boolean).length;
+  if(done===0) return 'not-started';
+  if(done===total) return 'done';
+  return 'in-progress';
+}
+
+function subjectProgress(subj){
+  const chs = state.chapters[subj] || {};
+  let doneUnits=0, totalUnits=0, doneChapters=0;
+  const keys = Object.keys(chs);
+  keys.forEach(k=>{
+    const e = chs[k];
+    const total = e.lectures.length + e.dpps.length;
+    const done = e.lectures.filter(Boolean).length + e.dpps.filter(Boolean).length;
+    doneUnits += done; totalUnits += total;
+    if(done===total) doneChapters++;
+  });
+  return { pct: totalUnits? Math.round((doneUnits/totalUnits)*100) : 0, doneChapters, totalChapters:keys.length };
+}
+
+function minutesToHM(mins){
+  const h = Math.floor(mins/60), m = mins%60;
+  return (h>0? h+'h ':'') + (m>0||h===0? m+'m':'');
+}
+
+function logsForDate(date){ return state.logs.filter(l=>l.date===date); }
+function logsForPeriod(period){
+  const today = todayIST();
+  if(period==='daily') return logsForDate(today);
+  const cutoff = new Date(Date.parse(today+'T00:00:00+05:30') - 6*86400000).toLocaleDateString('en-CA',{timeZone:'Asia/Kolkata'});
+  return state.logs.filter(l=>l.date>=cutoff && l.date<=today);
+}
+function aggregateLogs(logs, subjectFilter){
+  let totalMinutes=0, totalQs=0;
+  logs.forEach(l=>{
+    const mins = Number(l.hours||0)*60 + Number(l.minutes||0);
+    if(subjectFilter==='all'){
+      totalMinutes += mins;
+      totalQs += Number(l.questionsSolved||0);
+    } else if(l.subject===SUBJECT_META[subjectFilter].label){
+      totalMinutes += mins;
+      totalQs += Number(l.questionsSolved||0);
+    }
+  });
+  return {totalMinutes, totalQs};
+}
+function questionsTotalForDate(date){
+  const logs = logsForDate(date);
+  const bySubj = {physics:0, chemistry:0, maths:0};
+  logs.forEach(l=>{
+    const key = (l.subject||'').toLowerCase();
+    if(bySubj.hasOwnProperty(key)) bySubj[key] += Number(l.questionsSolved||0);
+  });
+  return bySubj;
+}
+function minutesTotalForDate(date){
+  return logsForDate(date).reduce((s,l)=>s+Number(l.hours||0)*60+Number(l.minutes||0),0);
+}
+function avgPercentile(){
+  const vals = state.tests.filter(t=>t.percentile!=='' && t.percentile!=null).map(t=>Number(t.percentile));
+  if(vals.length===0) return '—';
+  return (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1);
+}
+
+function render(){
+  document.documentElement.setAttribute('data-theme', state.theme==='dark' ? 'dark' : 'light');
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+  if(!CLOUD_ENABLED){
+    const banner = document.createElement('div');
+    banner.className = 'cloud-banner';
+    banner.textContent = 'Cloud sync isn\'t set up yet — saving to this browser only. Add your Supabase keys near the top of the script to enable login and cross-device sync.';
+    app.appendChild(banner);
+  }
+  const header = document.createElement('header');
+  header.className = 'top';
+  header.innerHTML = `
+    <div class="inner">
+      <div class="title-block">
+        <h1>JEE Mains 2027 — prep tracker</h1>
+        <p>Target attempt: ${formatExamDate(state.settings.examDate)} &middot; ${weakSubjectsText()}</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div class="theme-toggle">
+          <span class="lbl">${state.theme==='dark'?'Dark':'Light'}</span>
+          <div class="switch ${state.theme==='dark'?'on':''}" id="theme-switch"><div class="knob"></div></div>
+        </div>
+        <div class="countdown"><div class="num">${daysLeft()}</div><div class="lbl">days to go</div></div>
+      </div>
+    </div>`;
+  app.appendChild(header);
+  header.querySelector('#theme-switch').onclick = ()=>{
+    state.theme = state.theme==='dark' ? 'light' : 'dark';
+    saveState(); render();
+  };
+
+  const nav = document.createElement('nav');
+  nav.className = 'tabs';
+  [['dashboard','Dashboard'],['syllabus','Syllabus'],['practice','Practice sessions'],['log','Daily log'],['tests','Test scores'],['settings','Settings']].forEach(([id,label])=>{
+    const b = document.createElement('button');
+    b.textContent = label;
+    if(id===currentTab) b.classList.add('active');
+    b.onclick = ()=>{ currentTab=id; render(); };
+    nav.appendChild(b);
+  });
+  app.appendChild(nav);
+
+  const main = document.createElement('main');
+  const wrap = document.createElement('div'); wrap.className='wrap'; wrap.style.padding='0';
+  if(currentTab==='dashboard') wrap.appendChild(renderDashboard());
+  else if(currentTab==='syllabus') wrap.appendChild(renderSyllabus());
+  else if(currentTab==='log') wrap.appendChild(renderLog());
+  else if(currentTab==='practice') wrap.appendChild(renderPractice());
+  else if(currentTab==='tests') wrap.appendChild(renderTests());
+  else if(currentTab==='settings') wrap.appendChild(renderSettings());
+  main.appendChild(wrap);
+  app.appendChild(main);
+}
+
+function renderDashboard(){
+  const d = document.createElement('div');
+  const today = todayIST();
+  const todayMins = minutesTotalForDate(today);
+  const todayQs = questionsTotalForDate(today);
+  const todayQsTotal = aggregateLogs(logsForDate(today), 'all').totalQs;
+
+  const h0 = document.createElement('h2'); h0.className='section-h'; h0.textContent="Today";
+  d.appendChild(h0);
+  const statRow = document.createElement('div');
+  statRow.className = 'stat-row';
+  const overallDone = Object.keys(SYLLABUS).reduce((s,subj)=>s+subjectProgress(subj).doneChapters,0);
+  const overallTotal = Object.keys(SYLLABUS).reduce((s,subj)=>s+subjectProgress(subj).totalChapters,0);
+  statRow.innerHTML = `
+    <div class="stat"><div class="v">${minutesToHM(todayMins)}</div><div class="k">Studied today</div></div>
+    <div class="stat"><div class="v">${todayQsTotal}</div><div class="k">Questions today</div></div>
+    <div class="stat"><div class="v">${overallDone}/${overallTotal}</div><div class="k">Chapters done</div></div>
+    <div class="stat"><div class="v">${avgPercentile()}</div><div class="k">Avg percentile</div></div>
+  `;
+  d.appendChild(statRow);
+
+  const qsRow = document.createElement('div');
+  qsRow.className = 'qs-row';
+  qsRow.innerHTML = `
+    <div class="qs-card physics"><div class="v">${todayQs.physics}</div><div class="k">Physics Qs today</div></div>
+    <div class="qs-card chemistry"><div class="v">${todayQs.chemistry}</div><div class="k">Chemistry Qs today</div></div>
+    <div class="qs-card maths"><div class="v">${todayQs.maths}</div><div class="k">Maths Qs today</div></div>
+  `;
+  d.appendChild(qsRow);
+
+  const h = document.createElement('h2'); h.className='section-h'; h.textContent='Subject progress';
+  d.appendChild(h);
+  const grid = document.createElement('div');
+  grid.className = 'overview-grid';
+  Object.keys(SYLLABUS).forEach(subj=>{
+    const meta = SUBJECT_META[subj];
+    const p = subjectProgress(subj);
+    const card = document.createElement('div');
+    card.className = `subj-card ${meta.color}`;
+    card.innerHTML = `
+      <div class="head"><span class="name">${meta.label}${state.settings.weakSubjects[subj]?'<span class="weak-tag">weak area</span>':''}</span><span class="pct">${p.pct}%</span></div>
+      <div class="bar"><div class="fill" style="width:${p.pct}%"></div></div>
+      <div class="meta">${p.doneChapters}/${p.totalChapters} chapters fully done</div>`;
+    grid.appendChild(card);
+  });
+  d.appendChild(grid);
+
+  const h2 = document.createElement('h2'); h2.className='section-h'; h2.textContent='Recent activity';
+  d.appendChild(h2);
+  const recentLogs = state.logs.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,3);
+  if(recentLogs.length===0){
+    const e = document.createElement('div'); e.className='empty'; e.textContent='No study sessions logged yet. Add one from the Daily log tab.';
+    d.appendChild(e);
+  }else{
+    const list = document.createElement('div'); list.className='log-list';
+    recentLogs.forEach(l=> list.appendChild(logItemEl(l, false)));
+    d.appendChild(list);
+  }
+  return d;
+}
+
+function renderSyllabus(){
+  const d = document.createElement('div');
+  const tabsWrap = document.createElement('div');
+  tabsWrap.className = 'subj-tabs';
+  Object.keys(SYLLABUS).forEach(subj=>{
+    const meta = SUBJECT_META[subj];
+    const b = document.createElement('button');
+    b.textContent = meta.label;
+    b.className = subj===currentSubjectTab ? `active ${meta.color}` : '';
+    b.onclick = ()=>{ currentSubjectTab = subj; render(); };
+    tabsWrap.appendChild(b);
+  });
+  d.appendChild(tabsWrap);
+
+  const list = document.createElement('div');
+  list.className = 'chapter-list';
+  SYLLABUS[currentSubjectTab].forEach(([ch,count])=>{
+    const entry = state.chapters[currentSubjectTab][ch];
+    const key = currentSubjectTab+'::'+ch;
+    const isOpen = expandedChapters.has(key);
+    const lecDone = entry.lectures.filter(Boolean).length;
+    const dppDone = entry.dpps.filter(Boolean).length;
+
+    const row = document.createElement('div');
+    row.className = 'chapter-row';
+
+    const head = document.createElement('div');
+    head.className = 'chapter-head';
+    head.innerHTML = `
+      <span class="dot ${chapterStatus(entry)}"></span>
+      <span class="cinfo">
+        <div class="cname">${ch}</div>
+        <div class="csub">${lecDone}/${count} lectures &middot; ${dppDone}/${count} DPPs</div>
+      </span>
+      <span class="chevron ${isOpen?'open':''}">&#9656;</span>`;
+    head.onclick = ()=>{
+      if(expandedChapters.has(key)) expandedChapters.delete(key); else expandedChapters.add(key);
+      render();
+    };
+    row.appendChild(head);
+
+    const body = document.createElement('div');
+    body.className = 'chapter-body' + (isOpen?' open':'');
+    if(isOpen){
+      const table = document.createElement('table'); table.className='lec-table-v';
+      const headRow = document.createElement('tr');
+      headRow.innerHTML = `<th class="rlabel">#</th><th>Lecture</th><th>DPP</th>`;
+      table.appendChild(headRow);
+      for(let i=0;i<count;i++){
+        const tr = document.createElement('tr');
+        const numTd = document.createElement('td'); numTd.className='rlabel'; numTd.textContent = i+1;
+        tr.appendChild(numTd);
+
+        const lecTd = document.createElement('td');
+        const lecCb = document.createElement('input'); lecCb.type='checkbox'; lecCb.checked=entry.lectures[i];
+        lecCb.onchange = ()=>{ entry.lectures[i]=lecCb.checked; saveState(); render(); };
+        lecTd.appendChild(lecCb);
+        tr.appendChild(lecTd);
+
+        const dppTd = document.createElement('td');
+        const dppCb = document.createElement('input'); dppCb.type='checkbox'; dppCb.checked=entry.dpps[i];
+        dppCb.onchange = ()=>{ entry.dpps[i]=dppCb.checked; saveState(); render(); };
+        dppTd.appendChild(dppCb);
+        tr.appendChild(dppTd);
+
+        table.appendChild(tr);
+      }
+      body.appendChild(table);
+    }
+    row.appendChild(body);
+    list.appendChild(row);
+  });
+  d.appendChild(list);
+  return d;
+}
+
+function logItemEl(l, withDelete){
+  const item = document.createElement('div');
+  item.className = 'log-item';
+  const left = document.createElement('div'); left.className = 'l-left';
+  left.innerHTML = `<span class="date">${l.date}</span><span class="hrs">${minutesToHM(Number(l.hours||0)*60+Number(l.minutes||0))} &middot; ${l.subject || 'General'}</span>
+    ${Number(l.questionsSolved)?`<div class="qbits">${l.questionsSolved} questions solved (${l.subject||'General'})</div>`:''}
+    ${l.notes?`<div class="notes">${escapeHtml(l.notes)}</div>`:''}`;
+  item.appendChild(left);
+  if(withDelete){
+    const btn = document.createElement('button'); btn.className='del-btn'; btn.textContent='Remove';
+    btn.onclick = ()=>{ state.logs = state.logs.filter(x=>x!==l); saveState(); render(); };
+    item.appendChild(btn);
+  }
+  return item;
+}
+
+function renderLog(){
+  const d = document.createElement('div');
+  const h = document.createElement('h2'); h.className='section-h'; h.textContent='Log a study session';
+  d.appendChild(h);
+
+  const form = document.createElement('div');
+  form.className = 'form-row';
+  form.innerHTML = `
+    <div class="fgroup"><label>Date</label><input type="date" id="log-date" value="${todayIST()}"></div>
+    <div class="fgroup"><label>Subject (time)</label>
+      <select id="log-subject">
+        <option value="Physics">Physics</option>
+        <option value="Chemistry">Chemistry</option>
+        <option value="Maths">Maths</option>
+        <option value="General">General / mixed</option>
+      </select>
+    </div>
+    <div class="fgroup"><label>Time spent</label>
+      <div class="time-combo">
+        <select id="log-hours">${Array.from({length:13},(_,i)=>`<option value="${i}">${i} h</option>`).join('')}</select>
+        <select id="log-minutes">${[0,5,10,15,20,25,30,35,40,45,50,55].map(m=>`<option value="${m}">${m} m</option>`).join('')}</select>
+      </div>
+    </div>
+    <div class="fgroup"><label>Questions solved</label><input type="number" id="log-qs" min="0" placeholder="0"></div>
+    <textarea id="log-notes" placeholder="What did you cover? (e.g. just watched a lecture, no questions)"></textarea>
+    <button class="add-btn" id="log-add">Add entry</button>
+  `;
+  d.appendChild(form);
+  form.querySelector('#log-add').onclick = ()=>{
+    const date = form.querySelector('#log-date').value || todayIST();
+    const subject = form.querySelector('#log-subject').value;
+    const hours = form.querySelector('#log-hours').value;
+    const minutes = form.querySelector('#log-minutes').value;
+    const questionsSolved = form.querySelector('#log-qs').value || 0;
+    const notes = form.querySelector('#log-notes').value.trim();
+    if(Number(hours)===0 && Number(minutes)===0 && !Number(questionsSolved) && !notes) return;
+    state.logs.push({date, subject, hours, minutes, questionsSolved, notes});
+    state.logs.sort((a,b)=>a.date.localeCompare(b.date));
+    saveState(); render();
+  };
+
+  const h2 = document.createElement('h2'); h2.className='section-h'; h2.textContent='Summary';
+  d.appendChild(h2);
+
+  const periodTabs = document.createElement('div'); periodTabs.className='pill-tabs';
+  [['daily','Daily'],['weekly','Weekly']].forEach(([id,label])=>{
+    const b = document.createElement('button'); b.textContent=label;
+    if(id===logPeriod) b.classList.add('active');
+    b.onclick = ()=>{ logPeriod=id; render(); };
+    periodTabs.appendChild(b);
+  });
+  d.appendChild(periodTabs);
+
+  const subjTabs = document.createElement('div'); subjTabs.className='pill-tabs';
+  [['all','All (PCM)'],['physics','Physics'],['chemistry','Chemistry'],['maths','Maths']].forEach(([id,label])=>{
+    const b = document.createElement('button'); b.textContent=label;
+    let cls = id===logSubjectFilter ? 'active' : '';
+    if(id!=='all' && id===logSubjectFilter) cls += ' '+id;
+    b.className = cls;
+    b.onclick = ()=>{ logSubjectFilter=id; render(); };
+    subjTabs.appendChild(b);
+  });
+  d.appendChild(subjTabs);
+
+  const periodLogs = logsForPeriod(logPeriod);
+  const agg = aggregateLogs(periodLogs, logSubjectFilter);
+  const summary = document.createElement('div');
+  summary.className = 'stat-row';
+  summary.style.marginBottom = '20px';
+  summary.innerHTML = `
+    <div class="stat"><div class="v">${minutesToHM(agg.totalMinutes)}</div><div class="k">Time (${logPeriod})</div></div>
+    <div class="stat"><div class="v">${agg.totalQs}</div><div class="k">Questions (${logPeriod})</div></div>
+  `;
+  d.appendChild(summary);
+
+  const h3 = document.createElement('h2'); h3.className='section-h'; h3.textContent='Browse by date';
+  d.appendChild(h3);
+  const dateList = Array.from(new Set(state.logs.map(l=>l.date))).sort((a,b)=>b.localeCompare(a));
+  const pills = document.createElement('div'); pills.className='date-pills';
+  const clearBtn = document.createElement('button');
+  clearBtn.textContent = 'All entries'; clearBtn.className = 'clear' + (selectedLogDate===null?' active':'');
+  clearBtn.onclick = ()=>{ selectedLogDate=null; render(); };
+  pills.appendChild(clearBtn);
+  dateList.forEach(dt=>{
+    const b = document.createElement('button'); b.textContent = dt;
+    if(dt===selectedLogDate) b.classList.add('active');
+    b.onclick = ()=>{ selectedLogDate = dt; render(); };
+    pills.appendChild(b);
+  });
+  d.appendChild(pills);
+
+  const h4 = document.createElement('h2'); h4.className='section-h';
+  h4.textContent = selectedLogDate ? `Sessions on ${selectedLogDate}` : 'All sessions';
+  d.appendChild(h4);
+
+  if(selectedLogDate){
+    const dayMins = minutesTotalForDate(selectedLogDate);
+    const dayQs = questionsTotalForDate(selectedLogDate);
+    const dayQsTotal = dayQs.physics + dayQs.chemistry + dayQs.maths;
+    const daySummary = document.createElement('div');
+    daySummary.className = 'stat-row'; daySummary.style.cssText = 'grid-template-columns:repeat(2,1fr);margin-bottom:12px;';
+    daySummary.innerHTML = `
+      <div class="stat"><div class="v">${minutesToHM(dayMins)}</div><div class="k">Time studied</div></div>
+      <div class="stat"><div class="v">${dayQsTotal}</div><div class="k">Questions solved</div></div>
+    `;
+    d.appendChild(daySummary);
+    const dayQsRow = document.createElement('div');
+    dayQsRow.className = 'qs-row'; dayQsRow.style.marginBottom = '16px';
+    dayQsRow.innerHTML = `
+      <div class="qs-card physics"><div class="v">${dayQs.physics}</div><div class="k">Physics Qs</div></div>
+      <div class="qs-card chemistry"><div class="v">${dayQs.chemistry}</div><div class="k">Chemistry Qs</div></div>
+      <div class="qs-card maths"><div class="v">${dayQs.maths}</div><div class="k">Maths Qs</div></div>
+    `;
+    d.appendChild(dayQsRow);
+  }
+
+  const shown = selectedLogDate ? logsForDate(selectedLogDate) : state.logs.slice().reverse();
+  if(shown.length===0){
+    const e = document.createElement('div'); e.className='empty'; e.textContent = 'Nothing logged for this view yet.';
+    d.appendChild(e);
+  }else{
+    const list = document.createElement('div'); list.className='log-list';
+    shown.forEach(l=> list.appendChild(logItemEl(l, true)));
+    d.appendChild(list);
+  }
+  return d;
+}
+
+function renderPractice(){
+  const d = document.createElement('div');
+  const h = document.createElement('h2'); h.className='section-h'; h.textContent='Practice sessions';
+  d.appendChild(h);
+
+  const tabsWrap = document.createElement('div');
+  tabsWrap.className = 'subj-tabs';
+  Object.keys(SUBJECT_META).forEach(subj=>{
+    const meta = SUBJECT_META[subj];
+    const b = document.createElement('button');
+    b.textContent = meta.label;
+    b.className = subj===currentPracticeTab ? `active ${meta.color}` : '';
+    b.onclick = ()=>{ currentPracticeTab = subj; render(); };
+    tabsWrap.appendChild(b);
+  });
+  d.appendChild(tabsWrap);
+
+  const labels = PRACTICE_SESSIONS[currentPracticeTab];
+  const doneCount = labels.filter(l=>state.practiceSessions[currentPracticeTab][l]).length;
+  const note = document.createElement('p');
+  note.style.cssText = 'font-size:12.5px;color:var(--ink-faint);margin:-4px 0 14px;';
+  note.textContent = `${doneCount}/${labels.length} sessions done`;
+  d.appendChild(note);
+
+  const list = document.createElement('div'); list.className = 'practice-list';
+  labels.forEach(lbl=>{
+    const row = document.createElement('label'); row.className = 'practice-row';
+    const cb = document.createElement('input'); cb.type='checkbox';
+    cb.checked = state.practiceSessions[currentPracticeTab][lbl];
+    cb.onchange = ()=>{ state.practiceSessions[currentPracticeTab][lbl] = cb.checked; saveState(); render(); };
+    const span = document.createElement('span'); span.textContent = 'Session '+lbl;
+    row.appendChild(cb); row.appendChild(span);
+    list.appendChild(row);
+  });
+  d.appendChild(list);
+  return d;
+}
+
+function renderTests(){
+  const d = document.createElement('div');
+  const h = document.createElement('h2'); h.className='section-h'; h.textContent='Add a test result';
+  d.appendChild(h);
+  const form = document.createElement('div');
+  form.className = 'form-row';
+  form.innerHTML = `
+    <input type="date" id="test-date" value="${todayIST()}">
+    <input type="text" id="test-name" placeholder="Test name (e.g. mock 12)" style="flex:1;min-width:160px;">
+    <input type="number" id="test-score" placeholder="Score" min="0" max="300">
+    <input type="number" id="test-percentile" placeholder="Percentile" min="0" max="100" step="0.1">
+    <button class="add-btn" id="test-add">Add result</button>
+  `;
+  d.appendChild(form);
+  form.querySelector('#test-add').onclick = ()=>{
+    const date = form.querySelector('#test-date').value;
+    const name = form.querySelector('#test-name').value.trim();
+    const score = form.querySelector('#test-score').value;
+    const percentile = form.querySelector('#test-percentile').value;
+    if(!date || !name) return;
+    state.tests.push({date, name, score, percentile});
+    state.tests.sort((a,b)=>a.date.localeCompare(b.date));
+    saveState(); render();
+  };
+  const h2 = document.createElement('h2'); h2.className='section-h'; h2.textContent='All results';
+  d.appendChild(h2);
+  if(state.tests.length===0){
+    const e = document.createElement('div'); e.className='empty'; e.textContent='No test results yet.';
+    d.appendChild(e);
+  }else{
+    const list = document.createElement('div'); list.className='test-list';
+    state.tests.slice().reverse().forEach(t=>{
+      const item = document.createElement('div'); item.className='test-item';
+      const left = document.createElement('div'); left.className='t-left';
+      left.innerHTML = `<span class="date">${t.date}</span><div class="name">${escapeHtml(t.name)}${t.score?` &middot; score ${t.score}`:''}</div>`;
+      item.appendChild(left);
+      const right = document.createElement('div'); right.style.cssText='display:flex;align-items:center;gap:10px;';
+      right.innerHTML = `<span class="score">${t.percentile!==''&&t.percentile!=null?t.percentile+'%ile':'—'}</span>`;
+      const btn = document.createElement('button'); btn.className='del-btn'; btn.textContent='Remove';
+      btn.onclick = ()=>{ state.tests = state.tests.filter(x=>x!==t); saveState(); render(); };
+      right.appendChild(btn);
+      item.appendChild(right);
+      list.appendChild(item);
+    });
+    d.appendChild(list);
+  }
+  return d;
+}
+
+function renderSettings(){
+  const d = document.createElement('div');
+
+  if(CLOUD_ENABLED && currentUser){
+    const hAcc = document.createElement('h2'); hAcc.className='section-h'; hAcc.textContent='Account';
+    d.appendChild(hAcc);
+    const accRow = document.createElement('div'); accRow.className='form-row';
+    accRow.innerHTML = `<div class="fgroup"><label>Signed in as</label><div style="font-size:13px;padding-top:4px;">${escapeHtml(currentUser.email||'')}</div></div>`;
+    const signOutBtn = document.createElement('button'); signOutBtn.className='add-btn'; signOutBtn.textContent='Sign out'; signOutBtn.type='button';
+    signOutBtn.style.alignSelf='flex-end';
+    signOutBtn.onclick = async ()=>{ await sb.auth.signOut(); };
+    accRow.appendChild(signOutBtn);
+    d.appendChild(accRow);
+  }
+
+  const h = document.createElement('h2'); h.className='section-h'; h.textContent='Exam date';
+  d.appendChild(h);
+  const dateForm = document.createElement('div'); dateForm.className='form-row';
+  dateForm.innerHTML = `<div class="fgroup"><label>Target attempt date</label><input type="date" id="set-examdate" value="${state.settings.examDate}"></div>`;
+  d.appendChild(dateForm);
+  dateForm.querySelector('#set-examdate').onchange = (e)=>{
+    if(e.target.value){ state.settings.examDate = e.target.value; saveState(); render(); }
+  };
+
+  const h2 = document.createElement('h2'); h2.className='section-h'; h2.textContent='Weak subjects';
+  d.appendChild(h2);
+  const p = document.createElement('p'); p.style.cssText='font-size:12.5px;color:var(--ink-faint);margin:-4px 0 12px;';
+  p.textContent = 'Flagged subjects get a "weak area" badge on the dashboard.';
+  d.appendChild(p);
+  const weakForm = document.createElement('div'); weakForm.className='form-row';
+  Object.keys(SUBJECT_META).forEach(subj=>{
+    const label = document.createElement('label');
+    label.style.cssText = 'display:flex;align-items:center;gap:6px;font-size:13px;';
+    const cb = document.createElement('input'); cb.type='checkbox'; cb.checked = state.settings.weakSubjects[subj];
+    cb.onchange = ()=>{ state.settings.weakSubjects[subj]=cb.checked; saveState(); render(); };
+    label.appendChild(cb);
+    label.appendChild(document.createTextNode(SUBJECT_META[subj].label));
+    weakForm.appendChild(label);
+  });
+  d.appendChild(weakForm);
+
+  const h3 = document.createElement('h2'); h3.className='section-h'; h3.textContent='Your data';
+  d.appendChild(h3);
+  const dataForm = document.createElement('div'); dataForm.className='form-row';
+  dataForm.innerHTML = `
+    <button class="add-btn" id="set-export" type="button">Download backup</button>
+    <label class="add-btn" style="display:inline-flex;align-items:center;cursor:pointer;">
+      Import backup<input type="file" id="set-import" accept="application/json" style="display:none;">
+    </label>
+    <button class="add-btn" id="set-reset" type="button" style="background:var(--danger);">Reset all data</button>
+  `;
+  d.appendChild(dataForm);
+
+  dataForm.querySelector('#set-export').onclick = ()=>{
+    const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'jee-tracker-backup-'+todayIST()+'.json';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  dataForm.querySelector('#set-import').onchange = (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      try{
+        const parsed = JSON.parse(reader.result);
+        normalizeLoadedState(parsed);
+        saveState(); render();
+      }catch(err){ alert('That file could not be read as a valid backup.'); }
+    };
+    reader.readAsText(file);
+  };
+
+  dataForm.querySelector('#set-reset').onclick = ()=>{
+    if(confirm('This clears all logged progress, syllabus checkmarks, and test scores. This cannot be undone. Continue?')){
+      const keepTheme = state.theme;
+      localStorage.removeItem('jee-tracker-state');
+      localStorage.removeItem('jee-tracker-cache');
+      normalizeLoadedState({});
+      state.theme = keepTheme;
+      saveState(); render();
+    }
+  };
+
+  return d;
+}
+
+function escapeHtml(str){ const div=document.createElement('div'); div.textContent=str; return div.innerHTML; }
+
+boot();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('service-worker.js').catch(()=>{ /* not fatal */ });
+  });
+}
+</script>
+</body>
+</html>
