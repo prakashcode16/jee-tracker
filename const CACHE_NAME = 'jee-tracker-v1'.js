@@ -1,13 +1,13 @@
-const CACHE_NAME = 'jee-tracker-v1';
+const CACHE_NAME = 'jee-tracker-v2';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
- 
+
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
   self.skipWaiting();
 });
- 
+
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
@@ -16,13 +16,13 @@ self.addEventListener('activate', (event) => {
   );
   self.clients.claim();
 });
- 
+
 // Cache-first for the app shell, network for everything else (e.g. Supabase calls).
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return; // let API/CDN calls go straight to network
- 
+
   event.respondWith(
     caches.match(event.request).then((cached) => {
       const fetchPromise = fetch(event.request)
@@ -36,4 +36,3 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
- 
