@@ -241,6 +241,9 @@ let expandedChapters = new Set();
 let logPeriod = 'daily';
 let logSubjectFilter = 'all';
 let selectedLogDate = null;
+let rangeStart = null;
+let rangeEnd = null;
+let rangeExpanded = new Set();
 
 function todayIST(){
   return new Date().toLocaleDateString('en-CA', {timeZone:'Asia/Kolkata'});
@@ -277,8 +280,8 @@ function initChapters(){
 
 // ── Cloud sync config ────────────────────────────────────────────
 // Fill these in with your own Supabase project's values (Project Settings → API).
-const SUPABASE_URL = 'https://uzkvgxdpavjaciyccvgg.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV6a3ZneGRwYXZqYWNpeWNjdmdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODczODE5NDUsImV4cCI6MjEwMjk1Nzk0NX0.lKDC8bHCidHrz_wiRytD8BxJ2Y167jPgYr_yATN45rw';
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
 const CLOUD_ENABLED = !SUPABASE_URL.includes('YOUR_SUPABASE_URL');
 const sb = CLOUD_ENABLED ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
@@ -441,10 +444,21 @@ function minutesToHM(mins){
 
 function logsForDate(date){ return state.logs.filter(l=>l.date===date); }
 function logsForPeriod(period){
+  if(period==='alltime') return state.logs.slice();
   const today = todayIST();
   if(period==='daily') return logsForDate(today);
   const cutoff = new Date(Date.parse(today+'T00:00:00+05:30') - 6*86400000).toLocaleDateString('en-CA',{timeZone:'Asia/Kolkata'});
   return state.logs.filter(l=>l.date>=cutoff && l.date<=today);
+}
+function timeBySubjectForDate(date){
+  const logs = logsForDate(date);
+  const bySubj = {physics:0, chemistry:0, maths:0, general:0};
+  logs.forEach(l=>{
+    const mins = Number(l.hours||0)*60 + Number(l.minutes||0);
+    const key = (l.subject||'General').toLowerCase();
+    if(bySubj.hasOwnProperty(key)) bySubj[key]+=mins; else bySubj.general+=mins;
+  });
+  return bySubj;
 }
 function aggregateLogs(logs, subjectFilter){
   let totalMinutes=0, totalQs=0;
@@ -686,6 +700,95 @@ function logItemEl(l, withDelete){
   return item;
 }
 
+function renderRangeReport(){
+  const wrap = document.createElement('div');
+  const form = document.createElement('div'); form.className = 'form-row';
+  form.innerHTML = `
+    <div class="fgroup"><label>From</label><input type="date" id="range-start" value="${rangeStart||''}"></div>
+    <div class="fgroup"><label>To</label><input type="date" id="range-end" value="${rangeEnd||''}"></div>
+    <button class="add-btn" id="range-show" type="button" style="align-self:flex-end;">Show report</button>
+  `;
+  wrap.appendChild(form);
+  form.querySelector('#range-show').onclick = ()=>{
+    const s = form.querySelector('#range-start').value;
+    const e = form.querySelector('#range-end').value;
+    if(!s || !e){ return; }
+    rangeStart = s; rangeEnd = (e<s ? s : e); rangeExpanded = new Set();
+    render();
+  };
+
+  if(!rangeStart || !rangeEnd) return wrap;
+
+  const dates = Array.from(new Set(state.logs.map(l=>l.date)))
+    .filter(dt=>dt>=rangeStart && dt<=rangeEnd)
+    .sort((a,b)=>a.localeCompare(b));
+
+  if(dates.length===0){
+    const e = document.createElement('div'); e.className='empty';
+    e.textContent = 'No logged sessions in that date range.';
+    wrap.appendChild(e);
+    return wrap;
+  }
+
+  const totalMins = dates.reduce((s,dt)=>s+minutesTotalForDate(dt),0);
+  const totalQsAll = dates.reduce((s,dt)=>{
+    const q = questionsTotalForDate(dt); return s+q.physics+q.chemistry+q.maths;
+  },0);
+  const rangeSummary = document.createElement('div');
+  rangeSummary.className='stat-row'; rangeSummary.style.cssText='grid-template-columns:repeat(2,1fr);margin-bottom:14px;';
+  rangeSummary.innerHTML = `
+    <div class="stat"><div class="v">${minutesToHM(totalMins)}</div><div class="k">Total time in range</div></div>
+    <div class="stat"><div class="v">${totalQsAll}</div><div class="k">Total questions in range</div></div>
+  `;
+  wrap.appendChild(rangeSummary);
+
+  const list = document.createElement('div'); list.className = 'chapter-list';
+  dates.forEach(dt=>{
+    const mins = minutesTotalForDate(dt);
+    const qs = questionsTotalForDate(dt);
+    const qsTotal = qs.physics+qs.chemistry+qs.maths;
+    const timeBySubj = timeBySubjectForDate(dt);
+    const isOpen = rangeExpanded.has(dt);
+
+    const row = document.createElement('div'); row.className = 'chapter-row';
+    const head = document.createElement('div'); head.className = 'chapter-head';
+    head.innerHTML = `
+      <span class="cinfo">
+        <div class="cname">${dt}</div>
+        <div class="csub">${minutesToHM(mins)} &middot; ${qsTotal} questions</div>
+      </span>
+      <span class="chevron ${isOpen?'open':''}">&#9656;</span>`;
+    head.onclick = ()=>{
+      if(rangeExpanded.has(dt)) rangeExpanded.delete(dt); else rangeExpanded.add(dt);
+      render();
+    };
+    row.appendChild(head);
+
+    if(isOpen){
+      const body = document.createElement('div'); body.className = 'chapter-body open';
+      body.style.padding = '4px 16px 16px';
+      const qsRow = document.createElement('div');
+      qsRow.className = 'qs-row'; qsRow.style.marginBottom = '0';
+      qsRow.innerHTML = `
+        <div class="qs-card physics"><div class="v">${minutesToHM(timeBySubj.physics)}</div><div class="k">Physics &middot; ${qs.physics} Qs</div></div>
+        <div class="qs-card chemistry"><div class="v">${minutesToHM(timeBySubj.chemistry)}</div><div class="k">Chemistry &middot; ${qs.chemistry} Qs</div></div>
+        <div class="qs-card maths"><div class="v">${minutesToHM(timeBySubj.maths)}</div><div class="k">Maths &middot; ${qs.maths} Qs</div></div>
+      `;
+      body.appendChild(qsRow);
+      if(timeBySubj.general>0){
+        const genNote = document.createElement('div');
+        genNote.style.cssText = 'font-size:11.5px;color:var(--ink-faint);margin-top:8px;';
+        genNote.textContent = `+ ${minutesToHM(timeBySubj.general)} logged as general/mixed`;
+        body.appendChild(genNote);
+      }
+      row.appendChild(body);
+    }
+    list.appendChild(row);
+  });
+  wrap.appendChild(list);
+  return wrap;
+}
+
 function renderLog(){
   const d = document.createElement('div');
   const h = document.createElement('h2'); h.className='section-h'; h.textContent='Log a study session';
@@ -731,7 +834,7 @@ function renderLog(){
   d.appendChild(h2);
 
   const periodTabs = document.createElement('div'); periodTabs.className='pill-tabs';
-  [['daily','Daily'],['weekly','Weekly']].forEach(([id,label])=>{
+  [['daily','Daily'],['weekly','Weekly'],['alltime','All time']].forEach(([id,label])=>{
     const b = document.createElement('button'); b.textContent=label;
     if(id===logPeriod) b.classList.add('active');
     b.onclick = ()=>{ logPeriod=id; render(); };
@@ -752,14 +855,19 @@ function renderLog(){
 
   const periodLogs = logsForPeriod(logPeriod);
   const agg = aggregateLogs(periodLogs, logSubjectFilter);
+  const periodLabel = {daily:'today', weekly:'last 7 days', alltime:'all time'}[logPeriod];
   const summary = document.createElement('div');
   summary.className = 'stat-row';
   summary.style.marginBottom = '20px';
   summary.innerHTML = `
-    <div class="stat"><div class="v">${minutesToHM(agg.totalMinutes)}</div><div class="k">Time (${logPeriod})</div></div>
-    <div class="stat"><div class="v">${agg.totalQs}</div><div class="k">Questions (${logPeriod})</div></div>
+    <div class="stat"><div class="v">${minutesToHM(agg.totalMinutes)}</div><div class="k">Time (${periodLabel})</div></div>
+    <div class="stat"><div class="v">${agg.totalQs}</div><div class="k">Questions (${periodLabel})</div></div>
   `;
   d.appendChild(summary);
+
+  const h3b = document.createElement('h2'); h3b.className='section-h'; h3b.textContent='Date range report';
+  d.appendChild(h3b);
+  d.appendChild(renderRangeReport());
 
   const h3 = document.createElement('h2'); h3.className='section-h'; h3.textContent='Browse by date';
   d.appendChild(h3);
