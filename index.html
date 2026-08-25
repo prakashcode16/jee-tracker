@@ -280,8 +280,8 @@ function initChapters(){
 
 // ── Cloud sync config ────────────────────────────────────────────
 // Fill these in with your own Supabase project's values (Project Settings → API).
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const SUPABASE_URL = 'https://uzkvgxdpavjaciyccvgg.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV6a3ZneGRwYXZqYWNpeWNjdmdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODczODE5NDUsImV4cCI6MjEwMjk1Nzk0NX0.lKDC8bHCidHrz_wiRytD8BxJ2Y167jPgYr_yATN45rw';
 const CLOUD_ENABLED = !SUPABASE_URL.includes('YOUR_SUPABASE_URL');
 const sb = CLOUD_ENABLED ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
