@@ -5,171 +5,325 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JEE Mains 2027 — Prep Tracker</title>
 <link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <meta name="theme-color" content="#091413">
 <link rel="apple-touch-icon" href="icon-192.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
+  /* ── Design tokens ──────────────────────────────────────── */
   :root{
-    --ink:#1c2321; --ink-soft:#4a534f; --ink-faint:#8a938e;
-    --paper:#f6f3ec; --paper-card:#fffdf8; --line:#ddd6c5; --line-strong:#c9c0a8;
-    --physics:#2b5a8c; --physics-bg:#e5edf5;
-    --chemistry:#3d7a4a; --chemistry-bg:#e6f0e5;
-    --maths:#a56a1e; --maths-bg:#f5ecdb;
-    --done:#3d7a4a; --progress:#a56a1e; --not-started:#b3ab97; --danger:#b34a3a;
+    --bg:#f4f1ea;
+    --surface:#fffdf9;
+    --surface-2:#eeeae0;
+    --line:#ded8cb;
+    --line-soft:#e9e4d9;
+    --ink:#1b1f1e;
+    --ink-2:#555d5a;
+    --ink-3:#8b9390;
+    --accent:#0f6f5c;
+    --accent-ink:#ffffff;
+    --physics:#2f6db0;   --physics-bg:#e8f0f9;
+    --chemistry:#2f8355; --chemistry-bg:#e6f2ea;
+    --maths:#b3762a;     --maths-bg:#f8efe0;
+    --danger:#b4462f;    --danger-bg:#f9e9e5;
+    --done:#2f8355; --progress:#b3762a; --not-started:#b7b0a1;
+    --radius:14px;
+    --radius-sm:10px;
+    --shadow:0 1px 2px rgba(20,25,24,.05), 0 4px 14px rgba(20,25,24,.045);
+    --shadow-sm:0 1px 2px rgba(20,25,24,.05);
+    --font:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --font-display:'Fraunces',Georgia,"Times New Roman",serif;
   }
   [data-theme="dark"]{
-    --ink:#e7ede9; --ink-soft:#9fb0a8; --ink-faint:#63756c;
-    --paper:#091413; --paper-card:#0f201d; --line:#1c3330; --line-strong:#2a4a45;
-    --physics:#6fa4e0; --physics-bg:#16273b;
-    --chemistry:#5fce87; --chemistry-bg:#0f2a1e;
-    --maths:#e0a94e; --maths-bg:#332510;
-    --done:#5fce87; --progress:#e0a94e; --not-started:#3a504a; --danger:#e07a68;
+    --bg:#091413;
+    --surface:#0f1d1b;
+    --surface-2:#152523;
+    --line:#223734;
+    --line-soft:#1a2c2a;
+    --ink:#e8efec;
+    --ink-2:#9fb2ac;
+    --ink-3:#6b817b;
+    --accent:#3fbf9c;
+    --accent-ink:#05100e;
+    --physics:#69a8e8;   --physics-bg:#122636;
+    --chemistry:#57ca8c; --chemistry-bg:#0d2a1e;
+    --maths:#e3ad55;     --maths-bg:#2e2412;
+    --danger:#e8806a;    --danger-bg:#331813;
+    --done:#57ca8c; --progress:#e3ad55; --not-started:#3c4f4b;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.25);
+    --shadow-sm:0 1px 2px rgba(0,0,0,.3);
   }
+
   *{box-sizing:border-box;}
-  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--paper);color:var(--ink);padding:0 0 3rem;transition:background .15s ease,color .15s ease;}
-  .theme-toggle{display:flex;align-items:center;gap:8px;}
-  .theme-toggle .lbl{font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.05em;}
-  .switch{position:relative;width:42px;height:24px;border-radius:14px;background:var(--line-strong);border:1px solid var(--line-strong);cursor:pointer;flex-shrink:0;}
-  .switch .knob{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--paper-card);transition:left .15s ease;}
-  .switch.on{background:var(--ink);border-color:var(--ink);}
-  .switch.on .knob{left:20px;}
-  .wrap{max-width:960px;margin:0 auto;padding:0 20px;}
-  header.top{padding:28px 20px 20px;border-bottom:1px solid var(--line);background:var(--paper);}
-  header.top .inner{max-width:960px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px;}
-  .title-block h1{font-family:Georgia,"Times New Roman",serif;font-size:26px;font-weight:600;margin:0 0 4px;letter-spacing:-0.01em;}
-  .title-block p{margin:0;color:var(--ink-soft);font-size:13px;}
-  .countdown{text-align:right;background:var(--paper-card);border:1px solid var(--line);border-radius:10px;padding:10px 18px;min-width:150px;}
-  .countdown .num{font-size:28px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;}
-  .countdown .lbl{font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-faint);margin-top:3px;}
-  nav.tabs{display:flex;gap:4px;margin-top:18px;border-bottom:1px solid var(--line);max-width:960px;margin-left:auto;margin-right:auto;padding:0 20px;flex-wrap:wrap;}
-  nav.tabs button{appearance:none;border:none;background:none;cursor:pointer;padding:10px 14px;font-size:14px;color:var(--ink-soft);border-bottom:2px solid transparent;margin-bottom:-1px;font-family:inherit;}
-  nav.tabs button.active{color:var(--ink);border-bottom-color:var(--ink);font-weight:600;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    font-family:var(--font);
+    background:var(--bg);
+    color:var(--ink);
+    padding:0 0 max(4rem, env(safe-area-inset-bottom));
+    transition:background .2s ease,color .2s ease;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  .wrap{max-width:1000px;margin:0 auto;padding:0 clamp(14px,4vw,24px);}
+
+  /* ── Header ─────────────────────────────────────────────── */
+  header.top{
+    padding:clamp(18px,4vw,26px) 0 clamp(14px,3vw,18px);
+    background:var(--surface);
+    border-bottom:1px solid var(--line);
+  }
+  header.top .inner{
+    max-width:1000px;margin:0 auto;padding:0 clamp(14px,4vw,24px);
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;
+  }
+  .title-block h1{
+    font-family:var(--font-display);
+    font-size:clamp(19px,4.5vw,26px);font-weight:600;margin:0 0 3px;letter-spacing:-0.015em;line-height:1.15;
+  }
+  .title-block p{margin:0;color:var(--ink-2);font-size:clamp(11.5px,2.7vw,13px);}
+  .header-right{display:flex;align-items:center;gap:clamp(10px,3vw,16px);}
+  .countdown{
+    text-align:center;background:var(--accent);color:var(--accent-ink);
+    border-radius:var(--radius-sm);padding:clamp(7px,2vw,10px) clamp(12px,3.5vw,18px);
+    min-width:clamp(78px,22vw,110px);box-shadow:var(--shadow-sm);
+  }
+  .countdown .num{font-size:clamp(20px,5.5vw,28px);font-weight:700;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-0.02em;}
+  .countdown .lbl{font-size:9.5px;text-transform:uppercase;letter-spacing:0.08em;opacity:.8;margin-top:3px;font-weight:600;}
+
+  .theme-toggle{display:flex;align-items:center;gap:7px;}
+  .theme-toggle .lbl{font-size:10px;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;}
+  @media(max-width:420px){.theme-toggle .lbl{display:none;}}
+  .switch{position:relative;width:42px;height:24px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line);cursor:pointer;flex-shrink:0;transition:background .15s ease;}
+  .switch .knob{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--ink-3);transition:left .18s cubic-bezier(.4,0,.2,1),background .15s ease;}
+  .switch.on{background:var(--accent);border-color:var(--accent);}
+  .switch.on .knob{left:20px;background:var(--accent-ink);}
+
+  /* ── Nav ────────────────────────────────────────────────── */
+  nav.tabs{
+    display:flex;gap:2px;background:var(--surface);
+    border-bottom:1px solid var(--line);
+    max-width:1000px;margin:0 auto;padding:0 clamp(14px,4vw,24px);
+    overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+  }
+  nav.tabs::-webkit-scrollbar{display:none;}
+  nav.tabs button{
+    appearance:none;border:none;background:none;cursor:pointer;
+    padding:11px 13px;font-size:13.5px;color:var(--ink-2);
+    border-bottom:2px solid transparent;margin-bottom:-1px;font-family:inherit;
+    white-space:nowrap;font-weight:500;transition:color .15s ease;
+  }
+  nav.tabs button.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:650;}
   nav.tabs button:hover{color:var(--ink);}
-  main{padding-top:24px;}
-  .overview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:26px;}
-  @media(max-width:640px){.overview-grid{grid-template-columns:1fr;}}
-  .subj-card{background:var(--paper-card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;}
-  .subj-card .head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
-  .subj-card .name{font-weight:600;font-size:15px;}
-  .subj-card .pct{font-size:13px;color:var(--ink-soft);font-variant-numeric:tabular-nums;}
-  .bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden;}
-  .bar .fill{height:100%;border-radius:4px;transition:width .25s ease;}
-  .subj-card.physics .fill{background:var(--physics);}
-  .subj-card.chemistry .fill{background:var(--chemistry);}
-  .subj-card.maths .fill{background:var(--maths);}
-  .subj-card .meta{margin-top:8px;font-size:12px;color:var(--ink-faint);}
-  h2.section-h{font-size:17px;font-weight:600;margin:22px 0 12px;font-family:Georgia,serif;}
+
+  main{padding-top:clamp(16px,4vw,24px);}
+  h2.section-h{
+    font-family:var(--font-display);
+    font-size:clamp(15px,3.6vw,17px);font-weight:600;margin:clamp(20px,5vw,26px) 0 12px;letter-spacing:-0.01em;
+  }
   h2.section-h:first-child{margin-top:0;}
-  .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:10px;}
-  @media(max-width:640px){.stat-row{grid-template-columns:1fr 1fr;}}
-  .stat{background:var(--paper-card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;}
-  .stat .v{font-size:20px;font-weight:700;}
-  .stat .k{font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.05em;margin-top:2px;}
-  .qs-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
-  @media(max-width:640px){.qs-row{grid-template-columns:1fr;}}
-  .qs-card{border-radius:10px;padding:10px 14px;border:1px solid var(--line);}
-  .qs-card.physics{background:var(--physics-bg);}
-  .qs-card.chemistry{background:var(--chemistry-bg);}
-  .qs-card.maths{background:var(--maths-bg);}
-  .qs-card .v{font-size:18px;font-weight:700;}
-  .qs-card .k{font-size:11px;text-transform:uppercase;letter-spacing:0.05em;opacity:0.75;margin-top:2px;}
-  .subj-card.physics .v,.qs-card.physics .v{color:var(--physics);}
+  .hint{font-size:12px;color:var(--ink-3);margin:-6px 0 12px;line-height:1.5;}
+
+  /* ── Cards & stats ──────────────────────────────────────── */
+  .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(8px,2vw,12px);margin-bottom:12px;}
+  @media(max-width:700px){.stat-row{grid-template-columns:repeat(2,1fr);}}
+  .stat{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-sm);
+    padding:clamp(11px,2.8vw,14px);box-shadow:var(--shadow-sm);min-width:0;
+  }
+  .stat .v{font-size:clamp(17px,4.4vw,21px);font-weight:700;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;}
+  .stat .k{font-size:10px;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.06em;margin-top:3px;font-weight:600;}
+
+  .qs-row{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(8px,2vw,12px);margin-bottom:clamp(14px,4vw,20px);}
+  @media(max-width:560px){.qs-row{grid-template-columns:1fr;}}
+  .qs-card{border-radius:var(--radius-sm);padding:clamp(10px,2.6vw,13px);border:1px solid transparent;min-width:0;}
+  .qs-card.physics{background:var(--physics-bg);border-color:color-mix(in srgb,var(--physics) 22%,transparent);}
+  .qs-card.chemistry{background:var(--chemistry-bg);border-color:color-mix(in srgb,var(--chemistry) 22%,transparent);}
+  .qs-card.maths{background:var(--maths-bg);border-color:color-mix(in srgb,var(--maths) 22%,transparent);}
+  .qs-card .v{font-size:clamp(15px,4vw,18px);font-weight:700;letter-spacing:-0.02em;}
+  .qs-card .k{font-size:10px;text-transform:uppercase;letter-spacing:0.06em;opacity:.8;margin-top:3px;font-weight:600;}
+  .qs-card.physics .v{color:var(--physics);}
   .qs-card.chemistry .v{color:var(--chemistry);}
   .qs-card.maths .v{color:var(--maths);}
 
-  .pill-tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;}
-  .pill-tabs button{appearance:none;cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:600;padding:6px 13px;border-radius:20px;border:1px solid var(--line-strong);background:var(--paper-card);color:var(--ink-soft);}
-  .pill-tabs button.active{background:var(--ink);border-color:var(--ink);color:var(--paper-card);}
-  .pill-tabs button.active.physics{background:var(--physics-bg);border-color:var(--physics);color:var(--physics);}
-  .pill-tabs button.active.chemistry{background:var(--chemistry-bg);border-color:var(--chemistry);color:var(--chemistry);}
-  .pill-tabs button.active.maths{background:var(--maths-bg);border-color:var(--maths);color:var(--maths);}
+  .overview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(10px,2.5vw,14px);margin-bottom:clamp(18px,5vw,26px);}
+  @media(max-width:700px){.overview-grid{grid-template-columns:1fr;}}
+  .subj-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:clamp(13px,3.2vw,17px);box-shadow:var(--shadow-sm);min-width:0;}
+  .subj-card .head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;gap:8px;}
+  .subj-card .name{font-weight:650;font-size:14.5px;}
+  .subj-card .pct{font-size:13px;color:var(--ink-2);font-variant-numeric:tabular-nums;font-weight:600;}
+  .bar{height:7px;border-radius:99px;background:var(--surface-2);overflow:hidden;}
+  .bar .fill{height:100%;border-radius:99px;transition:width .3s cubic-bezier(.4,0,.2,1);}
+  .subj-card.physics .fill{background:var(--physics);}
+  .subj-card.chemistry .fill{background:var(--chemistry);}
+  .subj-card.maths .fill{background:var(--maths);}
+  .subj-card .meta{margin-top:9px;font-size:11.5px;color:var(--ink-3);}
+  .weak-tag{display:inline-block;font-size:9.5px;background:var(--danger-bg);color:var(--danger);padding:2px 7px;border-radius:99px;margin-left:6px;vertical-align:middle;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
 
-  .subj-tabs{display:flex;gap:8px;margin-bottom:16px;}
-  .subj-tabs button{appearance:none;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;padding:7px 14px;border-radius:20px;border:1px solid var(--line-strong);background:var(--paper-card);color:var(--ink-soft);}
-  .subj-tabs button.active.physics{background:var(--physics-bg);border-color:var(--physics);color:var(--physics);}
-  .subj-tabs button.active.chemistry{background:var(--chemistry-bg);border-color:var(--chemistry);color:var(--chemistry);}
-  .subj-tabs button.active.maths{background:var(--maths-bg);border-color:var(--maths);color:var(--maths);}
+  /* ── Pills ──────────────────────────────────────────────── */
+  .pill-tabs,.subj-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+  .pill-tabs button,.subj-tabs button{
+    appearance:none;cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:600;
+    padding:7px 14px;border-radius:99px;border:1px solid var(--line);
+    background:var(--surface);color:var(--ink-2);transition:all .15s ease;
+  }
+  .pill-tabs button:hover,.subj-tabs button:hover{border-color:var(--ink-3);}
+  .pill-tabs button.active{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);}
+  .pill-tabs button.active.physics,.subj-tabs button.active.physics{background:var(--physics-bg);border-color:var(--physics);color:var(--physics);}
+  .pill-tabs button.active.chemistry,.subj-tabs button.active.chemistry{background:var(--chemistry-bg);border-color:var(--chemistry);color:var(--chemistry);}
+  .pill-tabs button.active.maths,.subj-tabs button.active.maths{background:var(--maths-bg);border-color:var(--maths);color:var(--maths);}
 
-  .chapter-list{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--paper-card);}
-  .chapter-row{border-bottom:1px solid var(--line);}
+  /* ── Lists / chapters ───────────────────────────────────── */
+  .chapter-list{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--surface);box-shadow:var(--shadow-sm);}
+  .chapter-row{border-bottom:1px solid var(--line-soft);}
   .chapter-row:last-child{border-bottom:none;}
-  .chapter-head{display:flex;align-items:center;gap:10px;padding:11px 16px;cursor:pointer;font-size:14px;}
-  .chapter-head:hover{background:var(--paper);}
+  .chapter-head{display:flex;align-items:center;gap:10px;padding:12px clamp(12px,3vw,16px);cursor:pointer;font-size:14px;transition:background .12s ease;}
+  .chapter-head:hover{background:var(--surface-2);}
   .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
   .dot.not-started{background:var(--not-started);}
   .dot.in-progress{background:var(--progress);}
   .dot.done{background:var(--done);}
-  .chapter-head .cinfo{flex:1;}
-  .chapter-head .cname{font-weight:500;}
-  .chapter-head .csub{font-size:11.5px;color:var(--ink-faint);margin-top:2px;}
-  .chevron{font-size:11px;color:var(--ink-faint);transition:transform .15s ease;}
+  .chapter-head .cinfo{flex:1;min-width:0;}
+  .chapter-head .cname{font-weight:550;line-height:1.3;overflow-wrap:anywhere;}
+  .chapter-head .csub{font-size:11px;color:var(--ink-3);margin-top:3px;display:flex;gap:8px;flex-wrap:wrap;}
+  .chapter-head .csub b{font-weight:600;color:var(--ink-2);}
+  .chevron{font-size:10px;color:var(--ink-3);transition:transform .18s ease;flex-shrink:0;}
   .chevron.open{transform:rotate(90deg);}
-  .chapter-body{padding:4px 16px 16px;display:none;}
+  .chapter-body{padding:2px clamp(12px,3vw,16px) 14px;display:none;}
   .chapter-body.open{display:block;}
-  .lec-table-v{width:auto;min-width:180px;border-collapse:collapse;}
-  .lec-table-v th{font-size:11px;color:var(--ink-faint);font-weight:600;text-align:center;padding:4px 14px;border-bottom:1px solid var(--line);}
-  .lec-table-v td{padding:4px 14px;text-align:center;border-bottom:1px solid var(--line);}
+
+  .qbox{display:flex;align-items:center;gap:5px;flex-shrink:0;}
+  .qbox input{
+    width:54px;font-family:inherit;font-size:13px;text-align:center;
+    border:1px solid var(--line);border-radius:8px;padding:5px 4px;
+    background:var(--bg);color:var(--ink);
+  }
+  .qbox input:focus{outline:none;border-color:var(--accent);}
+  .qbox .qlbl{font-size:9.5px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em;font-weight:600;}
+  @media(max-width:480px){.qbox .qlbl{display:none;} .qbox input{width:48px;}}
+
+  .lec-table-v{width:100%;border-collapse:collapse;}
+  .lec-table-v th{font-size:10px;color:var(--ink-3);font-weight:700;text-align:center;padding:6px 10px;border-bottom:1px solid var(--line);text-transform:uppercase;letter-spacing:.05em;}
+  .lec-table-v td{padding:7px 10px;text-align:center;border-bottom:1px solid var(--line-soft);}
   .lec-table-v tr:last-child td{border-bottom:none;}
-  .lec-table-v .rlabel{text-align:left;font-size:12px;color:var(--ink-faint);}
+  .lec-table-v .rlabel{text-align:left;font-size:12px;color:var(--ink-3);width:40px;font-variant-numeric:tabular-nums;}
   .lec-table-v th.rlabel{text-align:left;}
 
-  .form-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;background:var(--paper-card);border:1px solid var(--line);border-radius:10px;padding:14px;align-items:flex-start;}
-  .form-row input,.form-row select,.form-row textarea{font-family:inherit;font-size:13px;border:1px solid var(--line-strong);border-radius:6px;padding:7px 9px;background:var(--paper);color:var(--ink);}
-  .form-row input[type=date]{width:150px;}
-  .form-row input[type=number]{width:78px;}
-  .form-row textarea{width:100%;min-height:44px;resize:vertical;font-family:inherit;}
-  .form-row button.add-btn{background:var(--ink);color:var(--paper-card);border:none;border-radius:6px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
-  .form-row button.add-btn:hover{opacity:0.88;}
-  .fgroup{display:flex;flex-direction:column;gap:3px;}
-  .fgroup label{font-size:10.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.04em;}
-  .time-combo{display:flex;gap:4px;align-items:center;}
-  .time-combo select{width:64px;}
+  input[type=checkbox]{width:17px;height:17px;accent-color:var(--accent);cursor:pointer;}
 
-  .log-list, .test-list{display:flex;flex-direction:column;gap:8px;}
-  .log-item, .test-item{background:var(--paper-card);border:1px solid var(--line);border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
-  .log-item .l-left{flex:1;}
-  .log-item .date{font-weight:600;font-size:13px;}
-  .log-item .hrs{color:var(--ink-soft);font-size:13px;margin-left:8px;}
-  .log-item .qbits{font-size:11.5px;color:var(--ink-faint);margin-top:4px;}
-  .log-item .notes{color:var(--ink-soft);font-size:13px;margin-top:4px;}
-  .test-item .name{font-size:13px;color:var(--ink-soft);}
-  .test-item .score{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;}
-  .del-btn{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:12px;padding:2px 6px;}
-  .del-btn:hover{color:var(--danger);}
-  .empty{color:var(--ink-faint);font-size:13px;padding:20px;text-align:center;background:var(--paper-card);border:1px dashed var(--line-strong);border-radius:10px;}
-  .weak-tag{display:inline-block;font-size:10px;background:var(--danger);color:#fff;padding:1px 6px;border-radius:8px;margin-left:6px;vertical-align:middle;}
+  .practice-list{columns:3;column-gap:20px;}
+  @media(max-width:700px){.practice-list{columns:2;}}
+  @media(max-width:400px){.practice-list{columns:1;}}
+  .practice-row{display:flex;align-items:center;gap:9px;padding:8px 10px;font-size:13px;break-inside:avoid;border-radius:8px;cursor:pointer;transition:background .12s ease;}
+  .practice-row:hover{background:var(--surface-2);}
+
+  /* ── Forms ──────────────────────────────────────────────── */
+  .form-row{
+    display:flex;gap:clamp(8px,2vw,11px);flex-wrap:wrap;margin-bottom:14px;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:clamp(12px,3vw,16px);align-items:flex-start;box-shadow:var(--shadow-sm);
+  }
+  .form-row input,.form-row select,.form-row textarea{
+    font-family:inherit;font-size:16px;border:1px solid var(--line);border-radius:9px;
+    padding:9px 10px;background:var(--bg);color:var(--ink);max-width:100%;
+  }
+  @media(min-width:700px){.form-row input,.form-row select,.form-row textarea{font-size:13.5px;}}
+  .form-row input:focus,.form-row select:focus,.form-row textarea:focus{outline:none;border-color:var(--accent);}
+  .form-row input[type=date]{min-width:0;width:100%;max-width:170px;}
+  .form-row input[type=number]{width:92px;}
+  .form-row textarea{width:100%;min-height:46px;resize:vertical;}
+  .fgroup{display:flex;flex-direction:column;gap:5px;min-width:0;}
+  .fgroup label{font-size:10px;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.06em;font-weight:700;}
+  .time-combo{display:flex;gap:5px;align-items:center;}
+  .time-combo select{width:74px;}
+  .add-btn{
+    background:var(--accent);color:var(--accent-ink);border:none;border-radius:9px;
+    padding:10px 18px;font-size:13.5px;font-weight:650;cursor:pointer;font-family:inherit;
+    transition:opacity .15s ease;white-space:nowrap;
+  }
+  .add-btn:hover{opacity:.88;}
+  .add-btn.ghost{background:var(--surface-2);color:var(--ink);border:1px solid var(--line);}
+  .add-btn.danger{background:var(--danger);color:#fff;}
+
+  /* ── Log & test items ───────────────────────────────────── */
+  .log-list,.test-list{display:flex;flex-direction:column;gap:8px;}
+  .log-item,.test-item{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-sm);
+    padding:12px clamp(12px,3vw,16px);display:flex;justify-content:space-between;
+    align-items:flex-start;gap:12px;box-shadow:var(--shadow-sm);
+  }
+  .log-item .l-left,.test-item .t-left{flex:1;min-width:0;}
+  .log-item .date,.test-item .date{font-weight:650;font-size:13px;}
+  .log-item .hrs{color:var(--ink-2);font-size:13px;margin-left:8px;}
+  .log-item .qbits{font-size:11.5px;color:var(--ink-3);margin-top:4px;}
+  .log-item .notes{color:var(--ink-2);font-size:12.5px;margin-top:5px;line-height:1.45;overflow-wrap:anywhere;}
+  .test-item .name{font-size:12.5px;color:var(--ink-2);margin-top:2px;overflow-wrap:anywhere;}
+  .test-item .score{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .del-btn{background:none;border:none;color:var(--ink-3);cursor:pointer;font-size:11.5px;padding:3px 6px;border-radius:6px;font-family:inherit;flex-shrink:0;}
+  .del-btn:hover{color:var(--danger);background:var(--danger-bg);}
+  .empty{color:var(--ink-3);font-size:12.5px;padding:24px 16px;text-align:center;background:var(--surface);border:1px dashed var(--line);border-radius:var(--radius);line-height:1.5;}
 
   .date-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
-  .date-pills button{appearance:none;cursor:pointer;font-family:inherit;font-size:12px;padding:5px 11px;border-radius:16px;border:1px solid var(--line-strong);background:var(--paper-card);color:var(--ink-soft);}
-  .date-pills button.active{background:var(--ink);border-color:var(--ink);color:var(--paper-card);}
+  .date-pills button{
+    appearance:none;cursor:pointer;font-family:inherit;font-size:11.5px;padding:6px 12px;
+    border-radius:99px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);font-variant-numeric:tabular-nums;
+  }
+  .date-pills button.active{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600;}
   .date-pills button.clear{border-style:dashed;}
 
-  .practice-list{columns:3;column-gap:22px;}
-  @media(max-width:640px){.practice-list{columns:2;}}
-  .practice-row{display:flex;align-items:center;gap:8px;padding:6px 4px;font-size:13px;break-inside:avoid;border-bottom:1px solid var(--line);cursor:pointer;}
-  .practice-row:hover{background:var(--paper-card);}
+  /* ── Analysis ───────────────────────────────────────────── */
+  .insight{
+    background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--ink-3);
+    border-radius:var(--radius-sm);padding:clamp(12px,3vw,15px);margin-bottom:9px;box-shadow:var(--shadow-sm);
+  }
+  .insight.warn{border-left-color:var(--danger);}
+  .insight.good{border-left-color:var(--done);}
+  .insight.info{border-left-color:var(--progress);}
+  .insight .ititle{font-weight:650;font-size:13.5px;margin-bottom:5px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+  .insight .ibody{font-size:12.5px;color:var(--ink-2);line-height:1.55;overflow-wrap:anywhere;}
+  .insight .ibody b{color:var(--ink);font-weight:600;}
+  .badge{font-size:9.5px;padding:2px 7px;border-radius:99px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+  .badge.physics{background:var(--physics-bg);color:var(--physics);}
+  .badge.chemistry{background:var(--chemistry-bg);color:var(--chemistry);}
+  .badge.maths{background:var(--maths-bg);color:var(--maths);}
+  .badge.danger{background:var(--danger-bg);color:var(--danger);}
 
-  .cloud-banner{background:var(--maths-bg);color:var(--maths);border-bottom:1px solid var(--line);font-size:12.5px;padding:8px 20px;text-align:center;}
+  .gap-list{display:flex;flex-direction:column;gap:7px;}
+  .gap-item{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-sm);
+    padding:11px clamp(11px,3vw,15px);display:flex;align-items:center;gap:11px;box-shadow:var(--shadow-sm);
+  }
+  .gap-item .gname{flex:1;min-width:0;font-size:13px;font-weight:550;overflow-wrap:anywhere;}
+  .gap-item .gmeta{font-size:11px;color:var(--ink-3);margin-top:3px;font-weight:400;}
+  .gap-item .gstat{font-size:12px;font-variant-numeric:tabular-nums;color:var(--ink-2);white-space:nowrap;text-align:right;font-weight:600;}
+  .minibar{width:clamp(54px,16vw,80px);height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden;flex-shrink:0;}
+  .minibar .mfill{height:100%;border-radius:99px;}
+
   .auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
-  .auth-card{background:var(--paper-card);border:1px solid var(--line);border-radius:14px;padding:28px 26px;max-width:340px;width:100%;}
-  .auth-card h1{font-family:Georgia,serif;font-size:20px;margin:0 0 4px;}
-  .auth-card p.sub{font-size:12.5px;color:var(--ink-faint);margin:0 0 20px;}
-  .auth-tabs{display:flex;gap:4px;margin-bottom:16px;background:var(--paper);border-radius:8px;padding:3px;}
-  .auth-tabs button{flex:1;appearance:none;border:none;background:none;padding:7px;font-size:12.5px;font-weight:600;border-radius:6px;cursor:pointer;color:var(--ink-soft);font-family:inherit;}
-  .auth-tabs button.active{background:var(--paper-card);color:var(--ink);}
-  .auth-field{display:flex;flex-direction:column;gap:4px;margin-bottom:12px;}
-  .auth-field label{font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.04em;}
-  .auth-field input{font-family:inherit;font-size:13px;border:1px solid var(--line-strong);border-radius:6px;padding:9px 10px;background:var(--paper);color:var(--ink);}
-  .auth-submit{width:100%;background:var(--ink);color:var(--paper-card);border:none;border-radius:6px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:4px;}
-  .auth-submit:hover{opacity:0.9;}
-  .auth-divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--ink-faint);font-size:11px;}
+  .auth-card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:clamp(22px,6vw,30px);max-width:360px;width:100%;box-shadow:var(--shadow);}
+  .auth-card h1{font-family:var(--font-display);font-size:21px;margin:0 0 5px;letter-spacing:-0.015em;}
+  .auth-card p.sub{font-size:12.5px;color:var(--ink-3);margin:0 0 20px;line-height:1.5;}
+  .auth-tabs{display:flex;gap:3px;margin-bottom:16px;background:var(--bg);border-radius:10px;padding:3px;}
+  .auth-tabs button{flex:1;appearance:none;border:none;background:none;padding:8px;font-size:12.5px;font-weight:650;border-radius:8px;cursor:pointer;color:var(--ink-2);font-family:inherit;}
+  .auth-tabs button.active{background:var(--surface);color:var(--ink);box-shadow:var(--shadow-sm);}
+  .auth-field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+  .auth-field label{font-size:10px;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.06em;font-weight:700;}
+  .auth-field input{font-family:inherit;font-size:16px;border:1px solid var(--line);border-radius:9px;padding:10px 11px;background:var(--bg);color:var(--ink);}
+  .auth-field input:focus{outline:none;border-color:var(--accent);}
+  .auth-submit{width:100%;background:var(--accent);color:var(--accent-ink);border:none;border-radius:9px;padding:11px;font-size:13.5px;font-weight:650;cursor:pointer;font-family:inherit;margin-top:4px;}
+  .auth-submit:hover{opacity:.9;}
+  .auth-divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--ink-3);font-size:10.5px;font-weight:600;letter-spacing:.06em;}
   .auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--line);}
-  .auth-google{width:100%;background:var(--paper);border:1px solid var(--line-strong);border-radius:6px;padding:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--ink);}
-  .auth-google:hover{background:var(--line-strong);}
-  .auth-msg{font-size:12px;margin-top:12px;padding:8px 10px;border-radius:6px;}
-  .auth-msg.error{background:#3a1a16;color:#e07a68;}
-  [data-theme="light"] .auth-msg.error{background:#f6e2de;color:#8a2c1d;}
+  .auth-google{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:10px;font-size:13.5px;font-weight:650;cursor:pointer;font-family:inherit;color:var(--ink);}
+  .auth-google:hover{background:var(--surface-2);}
+  .auth-msg{font-size:12px;margin-top:12px;padding:9px 11px;border-radius:9px;line-height:1.45;}
+  .auth-msg.error{background:var(--danger-bg);color:var(--danger);}
   .auth-msg.info{background:var(--maths-bg);color:var(--maths);}
+
+  .cloud-banner{background:var(--maths-bg);color:var(--maths);border-bottom:1px solid var(--line);font-size:12px;padding:9px 16px;text-align:center;line-height:1.45;}
 </style>
 </head>
 <body>
@@ -265,7 +419,13 @@ function initChapters(){
     SYLLABUS[subj].forEach(([ch,count])=>{
       const existing = state.chapters[subj][ch];
       if(!existing || !Array.isArray(existing.lectures) || existing.lectures.length!==count){
-        state.chapters[subj][ch] = { lectures:new Array(count).fill(false), dpps:new Array(count).fill(false) };
+        state.chapters[subj][ch] = {
+          lectures:new Array(count).fill(false),
+          dpps:new Array(count).fill(false),
+          questions: (existing && Number(existing.questions)) || 0
+        };
+      } else if(existing.questions===undefined){
+        existing.questions = 0;
       }
     });
   });
@@ -301,6 +461,58 @@ function normalizeLoadedState(parsed){
   state.settings.weakSubjects = Object.assign({}, DEFAULT_SETTINGS.weakSubjects, state.settings.weakSubjects);
   initChapters();
 }
+function shellOf(s){
+  return { chapters: s.chapters, practiceSessions: s.practiceSessions, settings: s.settings, theme: s.theme };
+}
+function rowToLog(r){ return { id:r.id, date:r.date, subject:r.subject, hours:r.hours, minutes:r.minutes, questionsSolved:r.questions_solved, notes:r.notes }; }
+function rowToTest(r){ return { id:r.id, date:r.date, name:r.name, score:r.score, percentile:r.percentile }; }
+
+// OR-merges boolean progress so one device can never erase a checkbox another device just set.
+// (Trade-off: unchecking a box may not "stick" across devices — see the note in chat.)
+function mergeShell(remote, local){
+  remote = remote || {}; local = local || {};
+  const merged = { chapters:{}, practiceSessions:{}, settings: local.settings || remote.settings, theme: local.theme || remote.theme };
+  const subjects = new Set([...Object.keys(remote.chapters||{}), ...Object.keys(local.chapters||{})]);
+  subjects.forEach(subj=>{
+    merged.chapters[subj] = {};
+    const rSubj = (remote.chapters||{})[subj] || {};
+    const lSubj = (local.chapters||{})[subj] || {};
+    const names = new Set([...Object.keys(rSubj), ...Object.keys(lSubj)]);
+    names.forEach(name=>{
+      const r = rSubj[name], l = lSubj[name];
+      const len = (l && l.lectures) ? l.lectures.length : ((r && r.lectures) ? r.lectures.length : 0);
+      const lectures=[], dpps=[];
+      for(let i=0;i<len;i++){
+        lectures.push(!!(r && r.lectures && r.lectures[i]) || !!(l && l.lectures && l.lectures[i]));
+        dpps.push(!!(r && r.dpps && r.dpps[i]) || !!(l && l.dpps && l.dpps[i]));
+      }
+      merged.chapters[subj][name] = { lectures, dpps, questions: Math.max(Number((r&&r.questions)||0), Number((l&&l.questions)||0)) };
+    });
+  });
+  const psSubjects = new Set([...Object.keys(remote.practiceSessions||{}), ...Object.keys(local.practiceSessions||{})]);
+  psSubjects.forEach(subj=>{
+    merged.practiceSessions[subj] = {};
+    const rSubj = (remote.practiceSessions||{})[subj] || {};
+    const lSubj = (local.practiceSessions||{})[subj] || {};
+    const labels = new Set([...Object.keys(rSubj), ...Object.keys(lSubj)]);
+    labels.forEach(lbl=>{ merged.practiceSessions[subj][lbl] = !!rSubj[lbl] || !!lSubj[lbl]; });
+  });
+  return merged;
+}
+
+async function pushLogsAndTestsToCloud(logs, tests){
+  if(!CLOUD_ENABLED || !currentUser) return { logs: logs||[], tests: tests||[] };
+  let newLogs = [], newTests = [];
+  if(logs && logs.length){
+    const toInsert = logs.map(l=>({ user_id:currentUser.id, date:l.date, subject:l.subject, hours:Number(l.hours||0), minutes:Number(l.minutes||0), questions_solved:Number(l.questionsSolved||0), notes:l.notes||'' }));
+    try{ const { data, error } = await sb.from('study_logs').insert(toInsert).select(); if(!error) newLogs = (data||[]).map(rowToLog); }catch(e){ console.error('log migration failed', e); }
+  }
+  if(tests && tests.length){
+    const toInsert = tests.map(t=>({ user_id:currentUser.id, date:t.date, name:t.name, score: t.score!=null?String(t.score):null, percentile: t.percentile!=null?String(t.percentile):null }));
+    try{ const { data, error } = await sb.from('test_scores').insert(toInsert).select(); if(!error) newTests = (data||[]).map(rowToTest); }catch(e){ console.error('test migration failed', e); }
+  }
+  return { logs:newLogs, tests:newTests };
+}
 
 async function boot(){
   if(!CLOUD_ENABLED){
@@ -330,9 +542,33 @@ function loadLocalOnly(){
 
 async function loadStateFromCloud(){
   try{
-    const { data, error } = await sb.from('tracker_state').select('data').eq('user_id', currentUser.id).maybeSingle();
-    if(error) throw error;
-    normalizeLoadedState(data && data.data ? data.data : {});
+    const { data: rowData, error: rowErr } = await sb.from('tracker_state').select('data').eq('user_id', currentUser.id).maybeSingle();
+    if(rowErr) throw rowErr;
+    const shell = rowData && rowData.data ? rowData.data : {};
+    normalizeLoadedState(shell);
+
+    const [{ data: logRows, error: logErr }, { data: testRows, error: testErr }] = await Promise.all([
+      sb.from('study_logs').select('*').eq('user_id', currentUser.id),
+      sb.from('test_scores').select('*').eq('user_id', currentUser.id)
+    ]);
+    if(logErr) throw logErr;
+    if(testErr) throw testErr;
+
+    let logs = (logRows||[]).map(rowToLog);
+    let tests = (testRows||[]).map(rowToTest);
+
+    // One-time migration: older saves kept logs/tests inside the shell blob — move them into their own tables.
+    if(logs.length===0 && Array.isArray(shell.logs) && shell.logs.length>0){
+      const pushed = await pushLogsAndTestsToCloud(shell.logs, []);
+      logs = pushed.logs;
+    }
+    if(tests.length===0 && Array.isArray(shell.tests) && shell.tests.length>0){
+      const pushed = await pushLogsAndTestsToCloud([], shell.tests);
+      tests = pushed.tests;
+    }
+
+    state.logs = logs.sort((a,b)=>a.date.localeCompare(b.date));
+    state.tests = tests.sort((a,b)=>a.date.localeCompare(b.date));
     localStorage.setItem('jee-tracker-cache', JSON.stringify(state));
   }catch(e){
     console.error('cloud load failed, using offline cache', e);
@@ -344,6 +580,8 @@ async function loadStateFromCloud(){
   render();
 }
 
+// Saves only the "shell" (syllabus checkmarks, practice sessions, settings, theme).
+// Logs and test scores are saved instantly and separately — see addLogEntry / addTestEntry.
 function saveState(){
   try{ localStorage.setItem(CLOUD_ENABLED ? 'jee-tracker-cache' : 'jee-tracker-state', JSON.stringify(state)); }
   catch(e){ console.error('local cache save failed', e); }
@@ -351,9 +589,67 @@ function saveState(){
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async ()=>{
     try{
-      await sb.from('tracker_state').upsert({ user_id: currentUser.id, data: state, updated_at: new Date().toISOString() });
+      const { data: current } = await sb.from('tracker_state').select('data').eq('user_id', currentUser.id).maybeSingle();
+      const merged = mergeShell(current && current.data, shellOf(state));
+      await sb.from('tracker_state').upsert({ user_id: currentUser.id, data: merged, updated_at: new Date().toISOString() });
     }catch(e){ console.error('cloud save failed', e); }
   }, 700);
+}
+
+async function addLogEntry(fields){
+  if(CLOUD_ENABLED && currentUser){
+    try{
+      const { data, error } = await sb.from('study_logs').insert({
+        user_id: currentUser.id, date: fields.date, subject: fields.subject,
+        hours: Number(fields.hours||0), minutes: Number(fields.minutes||0),
+        questions_solved: Number(fields.questionsSolved||0), notes: fields.notes||''
+      }).select().single();
+      if(error) throw error;
+      state.logs.push(rowToLog(data));
+    }catch(e){ console.error('add log failed', e); alert('Could not save this to the cloud — check your connection and try again.'); return; }
+  } else {
+    state.logs.push(fields);
+  }
+  state.logs.sort((a,b)=>a.date.localeCompare(b.date));
+  try{ localStorage.setItem(CLOUD_ENABLED ? 'jee-tracker-cache' : 'jee-tracker-state', JSON.stringify(state)); }catch(e){}
+  render();
+}
+
+async function deleteLogEntry(l){
+  state.logs = state.logs.filter(x=>x!==l);
+  try{ localStorage.setItem(CLOUD_ENABLED ? 'jee-tracker-cache' : 'jee-tracker-state', JSON.stringify(state)); }catch(e){}
+  render();
+  if(CLOUD_ENABLED && currentUser && l.id){
+    try{ await sb.from('study_logs').delete().eq('id', l.id); }catch(e){ console.error('delete log failed', e); }
+  }
+}
+
+async function addTestEntry(fields){
+  if(CLOUD_ENABLED && currentUser){
+    try{
+      const { data, error } = await sb.from('test_scores').insert({
+        user_id: currentUser.id, date: fields.date, name: fields.name,
+        score: fields.score!=null && fields.score!=='' ? String(fields.score) : null,
+        percentile: fields.percentile!=null && fields.percentile!=='' ? String(fields.percentile) : null
+      }).select().single();
+      if(error) throw error;
+      state.tests.push(rowToTest(data));
+    }catch(e){ console.error('add test failed', e); alert('Could not save this to the cloud — check your connection and try again.'); return; }
+  } else {
+    state.tests.push(fields);
+  }
+  state.tests.sort((a,b)=>a.date.localeCompare(b.date));
+  try{ localStorage.setItem(CLOUD_ENABLED ? 'jee-tracker-cache' : 'jee-tracker-state', JSON.stringify(state)); }catch(e){}
+  render();
+}
+
+async function deleteTestEntry(t){
+  state.tests = state.tests.filter(x=>x!==t);
+  try{ localStorage.setItem(CLOUD_ENABLED ? 'jee-tracker-cache' : 'jee-tracker-state', JSON.stringify(state)); }catch(e){}
+  render();
+  if(CLOUD_ENABLED && currentUser && t.id){
+    try{ await sb.from('test_scores').delete().eq('id', t.id); }catch(e){ console.error('delete test failed', e); }
+  }
 }
 
 function renderAuthScreen(){
@@ -510,7 +806,7 @@ function render(){
         <h1>JEE Mains 2027 — prep tracker</h1>
         <p>Target attempt: ${formatExamDate(state.settings.examDate)} &middot; ${weakSubjectsText()}</p>
       </div>
-      <div style="display:flex;align-items:center;gap:16px;">
+      <div class="header-right">
         <div class="theme-toggle">
           <span class="lbl">${state.theme==='dark'?'Dark':'Light'}</span>
           <div class="switch ${state.theme==='dark'?'on':''}" id="theme-switch"><div class="knob"></div></div>
@@ -526,7 +822,7 @@ function render(){
 
   const nav = document.createElement('nav');
   nav.className = 'tabs';
-  [['dashboard','Dashboard'],['syllabus','Syllabus'],['practice','Practice sessions'],['log','Daily log'],['tests','Test scores'],['settings','Settings']].forEach(([id,label])=>{
+  [['dashboard','Dashboard'],['analysis','Analysis'],['syllabus','Syllabus'],['practice','Practice sessions'],['log','Daily log'],['tests','Test scores'],['settings','Settings']].forEach(([id,label])=>{
     const b = document.createElement('button');
     b.textContent = label;
     if(id===currentTab) b.classList.add('active');
@@ -543,6 +839,7 @@ function render(){
   else if(currentTab==='practice') wrap.appendChild(renderPractice());
   else if(currentTab==='tests') wrap.appendChild(renderTests());
   else if(currentTab==='settings') wrap.appendChild(renderSettings());
+  else if(currentTab==='analysis') wrap.appendChild(renderAnalysis());
   main.appendChild(wrap);
   app.appendChild(main);
 }
@@ -640,13 +937,31 @@ function renderSyllabus(){
       <span class="dot ${chapterStatus(entry)}"></span>
       <span class="cinfo">
         <div class="cname">${ch}</div>
-        <div class="csub">${lecDone}/${count} lectures &middot; ${dppDone}/${count} DPPs</div>
-      </span>
-      <span class="chevron ${isOpen?'open':''}">&#9656;</span>`;
+        <div class="csub"><span><b>${lecDone}</b>/${count} lec</span><span><b>${dppDone}</b>/${count} DPP</span><span><b>${entry.questions||0}</b> Qs</span></div>
+      </span>`;
     head.onclick = ()=>{
       if(expandedChapters.has(key)) expandedChapters.delete(key); else expandedChapters.add(key);
       render();
     };
+
+    const qbox = document.createElement('span');
+    qbox.className = 'qbox';
+    qbox.onclick = (ev)=>ev.stopPropagation();
+    const qlbl = document.createElement('span'); qlbl.className='qlbl'; qlbl.textContent='Qs';
+    const qInput = document.createElement('input');
+    qInput.type='number'; qInput.min='0'; qInput.value = entry.questions||0;
+    qInput.onchange = ()=>{
+      entry.questions = Math.max(0, Number(qInput.value)||0);
+      saveState(); render();
+    };
+    qbox.appendChild(qlbl); qbox.appendChild(qInput);
+    head.appendChild(qbox);
+
+    const chev = document.createElement('span');
+    chev.className = 'chevron' + (isOpen?' open':'');
+    chev.innerHTML = '&#9656;';
+    head.appendChild(chev);
+
     row.appendChild(head);
 
     const body = document.createElement('div');
@@ -694,7 +1009,7 @@ function logItemEl(l, withDelete){
   item.appendChild(left);
   if(withDelete){
     const btn = document.createElement('button'); btn.className='del-btn'; btn.textContent='Remove';
-    btn.onclick = ()=>{ state.logs = state.logs.filter(x=>x!==l); saveState(); render(); };
+    btn.onclick = ()=>{ deleteLogEntry(l); };
     item.appendChild(btn);
   }
   return item;
@@ -825,9 +1140,7 @@ function renderLog(){
     const questionsSolved = form.querySelector('#log-qs').value || 0;
     const notes = form.querySelector('#log-notes').value.trim();
     if(Number(hours)===0 && Number(minutes)===0 && !Number(questionsSolved) && !notes) return;
-    state.logs.push({date, subject, hours, minutes, questionsSolved, notes});
-    state.logs.sort((a,b)=>a.date.localeCompare(b.date));
-    saveState(); render();
+    addLogEntry({date, subject, hours, minutes, questionsSolved, notes});
   };
 
   const h2 = document.createElement('h2'); h2.className='section-h'; h2.textContent='Summary';
@@ -980,9 +1293,7 @@ function renderTests(){
     const score = form.querySelector('#test-score').value;
     const percentile = form.querySelector('#test-percentile').value;
     if(!date || !name) return;
-    state.tests.push({date, name, score, percentile});
-    state.tests.sort((a,b)=>a.date.localeCompare(b.date));
-    saveState(); render();
+    addTestEntry({date, name, score, percentile});
   };
   const h2 = document.createElement('h2'); h2.className='section-h'; h2.textContent='All results';
   d.appendChild(h2);
@@ -999,13 +1310,226 @@ function renderTests(){
       const right = document.createElement('div'); right.style.cssText='display:flex;align-items:center;gap:10px;';
       right.innerHTML = `<span class="score">${t.percentile!==''&&t.percentile!=null?t.percentile+'%ile':'—'}</span>`;
       const btn = document.createElement('button'); btn.className='del-btn'; btn.textContent='Remove';
-      btn.onclick = ()=>{ state.tests = state.tests.filter(x=>x!==t); saveState(); render(); };
+      btn.onclick = ()=>{ deleteTestEntry(t); };
       right.appendChild(btn);
       item.appendChild(right);
       list.appendChild(item);
     });
     d.appendChild(list);
   }
+  return d;
+}
+
+function insightEl(kind, title, bodyHtml, badge){
+  const el = document.createElement('div');
+  el.className = 'insight '+kind;
+  el.innerHTML = `<div class="ititle">${title}${badge?` <span class="badge ${badge[1]}">${badge[0]}</span>`:''}</div><div class="ibody">${bodyHtml}</div>`;
+  return el;
+}
+
+function analyseChapters(){
+  const out = { lagging:[], untouched:[], noQuestions:[], complete:[] };
+  Object.keys(SYLLABUS).forEach(subj=>{
+    SYLLABUS[subj].forEach(([ch,count])=>{
+      const e = state.chapters[subj][ch];
+      if(!e) return;
+      const lec = e.lectures.filter(Boolean).length;
+      const dpp = e.dpps.filter(Boolean).length;
+      const qs = Number(e.questions||0);
+      const rec = {subj, ch, count, lec, dpp, qs, gap: lec-dpp};
+      if(lec===0 && dpp===0) out.untouched.push(rec);
+      else if(lec-dpp >= 2) out.lagging.push(rec);
+      if(lec>0 && qs===0) out.noQuestions.push(rec);
+      if(lec===count && dpp===count) out.complete.push(rec);
+    });
+  });
+  out.lagging.sort((a,b)=>b.gap-a.gap);
+  return out;
+}
+
+function recentDaysStats(days){
+  const today = todayIST();
+  const cutoff = new Date(Date.parse(today+'T00:00:00+05:30') - (days-1)*86400000).toLocaleDateString('en-CA',{timeZone:'Asia/Kolkata'});
+  const logs = state.logs.filter(l=>l.date>=cutoff && l.date<=today);
+  const dates = new Set(logs.map(l=>l.date));
+  const mins = logs.reduce((s,l)=>s+Number(l.hours||0)*60+Number(l.minutes||0),0);
+  const bySubj = {physics:0, chemistry:0, maths:0, general:0};
+  const qsBySubj = {physics:0, chemistry:0, maths:0};
+  logs.forEach(l=>{
+    const m = Number(l.hours||0)*60+Number(l.minutes||0);
+    const k = (l.subject||'General').toLowerCase();
+    if(bySubj.hasOwnProperty(k)) bySubj[k]+=m; else bySubj.general+=m;
+    if(qsBySubj.hasOwnProperty(k)) qsBySubj[k]+=Number(l.questionsSolved||0);
+  });
+  return { logs, activeDays:dates.size, windowDays:days, mins, bySubj, qsBySubj };
+}
+
+function currentStreak(){
+  const dates = new Set(state.logs.map(l=>l.date));
+  let streak = 0;
+  let cursor = Date.parse(todayIST()+'T00:00:00+05:30');
+  // today doesn't break the streak if not yet logged
+  if(!dates.has(new Date(cursor).toLocaleDateString('en-CA',{timeZone:'Asia/Kolkata'}))) cursor -= 86400000;
+  while(true){
+    const d = new Date(cursor).toLocaleDateString('en-CA',{timeZone:'Asia/Kolkata'});
+    if(dates.has(d)){ streak++; cursor -= 86400000; } else break;
+  }
+  return streak;
+}
+
+function renderAnalysis(){
+  const d = document.createElement('div');
+  const ch = analyseChapters();
+  const r14 = recentDaysStats(14);
+  const streak = currentStreak();
+
+  // ── Headline numbers
+  const totalQsChapters = Object.keys(SYLLABUS).reduce((s,subj)=>
+    s + SYLLABUS[subj].reduce((t,[c])=>t+Number((state.chapters[subj][c]||{}).questions||0),0), 0);
+  const psDone = Object.keys(SUBJECT_META).reduce((s,subj)=>
+    s + PRACTICE_SESSIONS[subj].filter(l=>state.practiceSessions[subj][l]).length, 0);
+  const psTotal = Object.keys(SUBJECT_META).reduce((s,subj)=>s+PRACTICE_SESSIONS[subj].length,0);
+
+  const top = document.createElement('div');
+  top.className = 'stat-row';
+  top.innerHTML = `
+    <div class="stat"><div class="v">${streak}</div><div class="k">Day streak</div></div>
+    <div class="stat"><div class="v">${r14.activeDays}/14</div><div class="k">Days active (2 wks)</div></div>
+    <div class="stat"><div class="v">${totalQsChapters}</div><div class="k">Chapter Qs logged</div></div>
+    <div class="stat"><div class="v">${psDone}/${psTotal}</div><div class="k">Practice sessions</div></div>
+  `;
+  d.appendChild(top);
+
+  // ── What needs correcting
+  const h1 = document.createElement('h2'); h1.className='section-h'; h1.textContent='What needs correcting';
+  d.appendChild(h1);
+
+  const insights = [];
+
+  if(ch.lagging.length){
+    const top5 = ch.lagging.slice(0,5).map(c=>`<b>${c.ch}</b> (${c.lec} lec vs ${c.dpp} DPP)`).join(', ');
+    insights.push(insightEl('warn','Lectures are running ahead of practice',
+      `${ch.lagging.length} chapter${ch.lagging.length>1?'s are':' is'} at least 2 DPPs behind the lectures you've watched. Biggest gaps: ${top5}. Watching without solving is the fastest way to feel productive and still lose marks — clear these DPPs before starting new chapters.`));
+  }
+
+  if(ch.noQuestions.length){
+    const names = ch.noQuestions.slice(0,6).map(c=>c.ch).join(', ');
+    insights.push(insightEl('warn','Chapters with zero questions attempted',
+      `${ch.noQuestions.length} chapter${ch.noQuestions.length>1?'s have':' has'} lectures watched but no questions logged: ${names}${ch.noQuestions.length>6?', …':''}. A chapter isn't learnt until you've been beaten by its questions.`));
+  }
+
+  const weak = Object.keys(SUBJECT_META).filter(s=>state.settings.weakSubjects[s]);
+  if(weak.length && r14.mins>0){
+    weak.forEach(s=>{
+      const share = Math.round((r14.bySubj[s]/r14.mins)*100);
+      if(share < 25){
+        insights.push(insightEl('warn',`${SUBJECT_META[s].label} is flagged weak but under-studied`,
+          `Only <b>${share}%</b> of your logged time in the last 2 weeks went to ${SUBJECT_META[s].label} (${minutesToHM(r14.bySubj[s])}). Weak subjects need more time than strong ones, not less.`, ['Weak area','danger']));
+      }
+    });
+  }
+
+  if(r14.activeDays < 7){
+    insights.push(insightEl('warn','Consistency is the bottleneck',
+      `You logged study on <b>${r14.activeDays} of the last 14 days</b>. At this rate the syllabus won't close before ${formatExamDate(state.settings.examDate)}. Logging even a 30-minute session keeps the habit visible.`));
+  }
+
+  if(psTotal>0 && psDone/psTotal < 0.15 && r14.activeDays>0){
+    insights.push(insightEl('info','Practice sessions are barely started',
+      `<b>${psDone} of ${psTotal}</b> practice sessions ticked off. These are the closest thing you have to exam-condition reps — they're worth prioritising over re-watching lectures.`));
+  }
+
+  if(state.tests.length>0){
+    const withP = state.tests.filter(t=>t.percentile!==''&&t.percentile!=null);
+    if(withP.length>=2){
+      const first = Number(withP[0].percentile), last = Number(withP[withP.length-1].percentile);
+      const diff = (last-first).toFixed(1);
+      if(last>=first){
+        insights.push(insightEl('good','Test scores are trending up',
+          `Percentile moved from <b>${first}</b> to <b>${last}</b> across ${withP.length} tests (+${diff}). Whatever changed in between, keep doing it.`));
+      } else {
+        insights.push(insightEl('warn','Test scores have slipped',
+          `Percentile moved from <b>${first}</b> to <b>${last}</b> (${diff}). Worth checking whether this lines up with the chapters where your DPPs are lagging.`));
+      }
+    }
+  } else {
+    insights.push(insightEl('info','No test scores logged yet',
+      `Tests are the only honest feedback on whether the hours are converting. Log your next one under the Test scores tab.`));
+  }
+
+  if(ch.complete.length>0){
+    insights.push(insightEl('good',`${ch.complete.length} chapter${ch.complete.length>1?'s':''} fully closed out`,
+      `Lectures and DPPs both complete: ${ch.complete.slice(0,4).map(c=>`<b>${c.ch}</b>`).join(', ')}${ch.complete.length>4?', …':''}. Schedule a revision pass on these before they go stale.`));
+  }
+
+  if(insights.length===0){
+    const e = document.createElement('div'); e.className='empty';
+    e.textContent = 'Not enough data yet — log a few study sessions and tick off some lectures, and this tab will start flagging gaps.';
+    d.appendChild(e);
+  } else {
+    insights.forEach(i=>d.appendChild(i));
+  }
+
+  // ── Practice gap table
+  if(ch.lagging.length){
+    const h2 = document.createElement('h2'); h2.className='section-h'; h2.textContent='Biggest practice gaps';
+    d.appendChild(h2);
+    const hint = document.createElement('p'); hint.className='hint';
+    hint.textContent = 'Chapters where DPPs trail the lectures you have already watched.';
+    d.appendChild(hint);
+    const list = document.createElement('div'); list.className='gap-list';
+    ch.lagging.slice(0,10).forEach(c=>{
+      const pct = c.count? Math.round((c.dpp/c.count)*100) : 0;
+      const item = document.createElement('div'); item.className='gap-item';
+      item.innerHTML = `
+        <span class="gname">${c.ch}<div class="gmeta"><span class="badge ${SUBJECT_META[c.subj].color}">${SUBJECT_META[c.subj].label}</span> &nbsp;${c.qs} Qs logged</div></span>
+        <span class="minibar"><span class="mfill" style="width:${pct}%;background:var(--${SUBJECT_META[c.subj].color})"></span></span>
+        <span class="gstat">${c.dpp}/${c.count} DPP</span>`;
+      list.appendChild(item);
+    });
+    d.appendChild(list);
+  }
+
+  // ── Where your time goes
+  const h3 = document.createElement('h2'); h3.className='section-h'; h3.textContent='Where your time went (last 14 days)';
+  d.appendChild(h3);
+  if(r14.mins===0){
+    const e = document.createElement('div'); e.className='empty'; e.textContent='No sessions logged in the last two weeks.';
+    d.appendChild(e);
+  } else {
+    const grid = document.createElement('div'); grid.className='overview-grid';
+    Object.keys(SUBJECT_META).forEach(subj=>{
+      const meta = SUBJECT_META[subj];
+      const share = Math.round((r14.bySubj[subj]/r14.mins)*100);
+      const card = document.createElement('div');
+      card.className = `subj-card ${meta.color}`;
+      card.innerHTML = `
+        <div class="head"><span class="name">${meta.label}${state.settings.weakSubjects[subj]?'<span class="weak-tag">weak</span>':''}</span><span class="pct">${share}%</span></div>
+        <div class="bar"><div class="fill" style="width:${share}%"></div></div>
+        <div class="meta">${minutesToHM(r14.bySubj[subj])} &middot; ${r14.qsBySubj[subj]} questions</div>`;
+      grid.appendChild(card);
+    });
+    d.appendChild(grid);
+  }
+
+  // ── Untouched chapters
+  const h4 = document.createElement('h2'); h4.className='section-h'; h4.textContent='Not started yet';
+  d.appendChild(h4);
+  if(ch.untouched.length===0){
+    const e = document.createElement('div'); e.className='empty'; e.textContent='Every chapter has at least been opened. Good.';
+    d.appendChild(e);
+  } else {
+    const bySubj = {};
+    ch.untouched.forEach(c=>{ (bySubj[c.subj]=bySubj[c.subj]||[]).push(c.ch); });
+    Object.keys(bySubj).forEach(subj=>{
+      const el = insightEl('info',
+        `${SUBJECT_META[subj].label} — ${bySubj[subj].length} untouched`,
+        bySubj[subj].join(' &middot; '),
+        [SUBJECT_META[subj].label, SUBJECT_META[subj].color]);
+      d.appendChild(el);
+    });
+  }
+
   return d;
 }
 
@@ -1054,11 +1578,11 @@ function renderSettings(){
   d.appendChild(h3);
   const dataForm = document.createElement('div'); dataForm.className='form-row';
   dataForm.innerHTML = `
-    <button class="add-btn" id="set-export" type="button">Download backup</button>
-    <label class="add-btn" style="display:inline-flex;align-items:center;cursor:pointer;">
+    <button class="add-btn ghost" id="set-export" type="button">Download backup</button>
+    <label class="add-btn ghost" style="display:inline-flex;align-items:center;cursor:pointer;">
       Import backup<input type="file" id="set-import" accept="application/json" style="display:none;">
     </label>
-    <button class="add-btn" id="set-reset" type="button" style="background:var(--danger);">Reset all data</button>
+    <button class="add-btn danger" id="set-reset" type="button">Reset all data</button>
   `;
   d.appendChild(dataForm);
 
@@ -1075,10 +1599,19 @@ function renderSettings(){
     const file = e.target.files[0];
     if(!file) return;
     const reader = new FileReader();
-    reader.onload = ()=>{
+    reader.onload = async ()=>{
       try{
         const parsed = JSON.parse(reader.result);
         normalizeLoadedState(parsed);
+        const importedLogs = state.logs, importedTests = state.tests;
+        if(CLOUD_ENABLED && currentUser){
+          try{
+            await sb.from('study_logs').delete().eq('user_id', currentUser.id);
+            await sb.from('test_scores').delete().eq('user_id', currentUser.id);
+          }catch(err){ console.error('clearing old cloud rows failed', err); }
+          const pushed = await pushLogsAndTestsToCloud(importedLogs, importedTests);
+          state.logs = pushed.logs; state.tests = pushed.tests;
+        }
         saveState(); render();
       }catch(err){ alert('That file could not be read as a valid backup.'); }
     };
@@ -1087,12 +1620,20 @@ function renderSettings(){
 
   dataForm.querySelector('#set-reset').onclick = ()=>{
     if(confirm('This clears all logged progress, syllabus checkmarks, and test scores. This cannot be undone. Continue?')){
-      const keepTheme = state.theme;
-      localStorage.removeItem('jee-tracker-state');
-      localStorage.removeItem('jee-tracker-cache');
-      normalizeLoadedState({});
-      state.theme = keepTheme;
-      saveState(); render();
+      (async ()=>{
+        const keepTheme = state.theme;
+        if(CLOUD_ENABLED && currentUser){
+          try{
+            await sb.from('study_logs').delete().eq('user_id', currentUser.id);
+            await sb.from('test_scores').delete().eq('user_id', currentUser.id);
+          }catch(err){ console.error('cloud reset failed', err); }
+        }
+        localStorage.removeItem('jee-tracker-state');
+        localStorage.removeItem('jee-tracker-cache');
+        normalizeLoadedState({});
+        state.theme = keepTheme;
+        saveState(); render();
+      })();
     }
   };
 
